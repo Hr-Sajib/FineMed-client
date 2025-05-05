@@ -10,7 +10,7 @@ import Link from 'next/link';
 
 const Banner = () => {
   return (
-    <div className="container mx-auto h-[700px] px-4 py-8 overflow-hidden mb-20"> 
+    <div className="container lg:w-[80vw] w-[95vw] mx-auto lg:h-[700px] h-[40vh] overflow-hidden mb-20"> 
       <Swiper
         spaceBetween={0}
         slidesPerView={1}

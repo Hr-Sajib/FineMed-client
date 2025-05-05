@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -8,6 +9,38 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useGetAllMedicinesQuery } from "@/redux/features/medicine/medicineApi";
 import { selectMedicines, setMedicines } from "@/redux/features/medicine/medicineSlice";
 import { addToCart, selectCart } from "@/redux/features/cart/cartSlice";
+import { IMedicine } from "@/types";
+
+// Define the expected response type for the query
+interface MedicinesResponse {
+  data: IMedicine[] | { medicines: IMedicine[] };
+}
+
+const MedicineCardSkeleton = () => {
+  return (
+    <div className="border border-gray-200 shadow-md rounded-md overflow-hidden p-4 animate-pulse">
+      <div className="relative w-full h-[200px] mb-4 rounded-md overflow-hidden bg-gray-200"></div>
+      <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+      <div className="flex gap-0">
+        <div className="h-5 bg-gray-200 rounded w-16"></div>
+        <div className="h-5 bg-gray-200 rounded w-24"></div>
+      </div>
+      <div className="flex gap-0 mt-1">
+        <div className="h-5 bg-gray-200 rounded w-20"></div>
+        <div className="h-5 bg-gray-200 rounded w-16"></div>
+      </div>
+      <div className="h-6 bg-gray-200 rounded w-1/4 mt-2"></div>
+      <div className="flex gap-2 mt-2">
+        <div className="h-5 bg-gray-200 rounded w-20"></div>
+        <div className="h-5 bg-gray-200 rounded w-6"></div>
+      </div>
+      <div className="flex justify-between mt-4">
+        <div className="h-8 bg-gray-200 rounded-full w-20"></div>
+        <div className="h-8 bg-gray-200 rounded-full w-28"></div>
+      </div>
+    </div>
+  );
+};
 
 const AllMedicinesPage = () => {
   const dispatch = useDispatch();
@@ -16,27 +49,29 @@ const AllMedicinesPage = () => {
   const medicines = useSelector(selectMedicines).medicines;
   const cartItems = useSelector(selectCart);
 
-  // Initialize search state from URL query parameter
+  // Initialize states from URL query parameters
   const initialSearch = searchParams.get("search") || "";
+  const initialCategory = searchParams.get("category") || "";
   const [search, setSearch] = useState(initialSearch);
-  const [filterCategory, setFilterCategory] = useState("");
+  const [filterCategory, setFilterCategory] = useState(initialCategory);
   const [filterForm, setFilterForm] = useState("");
   const [filterPrescription, setFilterPrescription] = useState("");
   const [sortPrice, setSortPrice] = useState("");
 
   const { data, isLoading, error } = useGetAllMedicinesQuery({
     search: search || undefined,
-  });
+  }) as { data?: MedicinesResponse; isLoading: boolean; error: any };
 
-  // Update URL when search changes
+  // Update URL when search or category changes
   useEffect(() => {
-    if (search) {
-      router.replace(`/shop?search=${encodeURIComponent(search)}`, { scroll: false });
-    } else {
-      router.replace("/shop", { scroll: false });
-    }
-  }, [search, router]);
+    const query = new URLSearchParams();
+    if (search) query.set("search", encodeURIComponent(search));
+    if (filterCategory) query.set("category", encodeURIComponent(filterCategory));
+    const queryString = query.toString();
+    router.replace(`/shop${queryString ? `?${queryString}` : ""}`, { scroll: false });
+  }, [search, filterCategory, router]);
 
+  // Update medicines in Redux store when data is fetched
   useEffect(() => {
     if (data?.data) {
       const medicinesArray = Array.isArray(data.data)
@@ -74,12 +109,22 @@ const AllMedicinesPage = () => {
     return filteredMedicines;
   }, [filteredMedicines, sortPrice]);
 
-  if (isLoading)
+  if (isLoading) {
     return (
-      <div className="min-h-[70vh] text-center py-8 text-gray-500 mt-[20%]">
-        Loading...
+      <div className="min-h-[70vh] py-8 px-4 lg:w-[80vw] mx-auto mt-10">
+        <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">
+          All Medicines
+        </h2>
+        {/* Skeleton Grid */}
+        <div className="grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-6">
+          {[...Array(8)].map((_, index) => (
+            <MedicineCardSkeleton key={index} />
+          ))}
+        </div>
       </div>
     );
+  }
+
   if (error)
     return (
       <div className="min-h-[70vh] text-center py-8 text-red-600">
@@ -88,7 +133,7 @@ const AllMedicinesPage = () => {
     );
 
   return (
-    <div className="min-h-[70vh] py-8 px-4 max-w-7xl mx-auto mt-10">
+    <div className="min-h-[70vh] py-8 px-4 lg:w-[80vw] mx-auto mt-10">
       <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">
         All Medicines
       </h2>
@@ -151,7 +196,7 @@ const AllMedicinesPage = () => {
       </div>
 
       {/* 🧾 Medicines Grid */}
-      <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-6">
+      <div className="grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-6 mb-30">
         {sortedMedicines.map((medicine) => {
           const isInCart = cartItems.some((item) => item._id === medicine._id);
           const isOutOfStock = medicine.quantity === 0;
@@ -165,8 +210,8 @@ const AllMedicinesPage = () => {
                 <Image
                   src={medicine.image}
                   alt={medicine.name}
-                  layout="fill"
-                  objectFit="cover"
+                  fill
+                  style={{ objectFit: "cover" }}
                   className="rounded-md"
                 />
               </div>
@@ -195,11 +240,10 @@ const AllMedicinesPage = () => {
                 </p>
               </div>
 
-             
               <div className="flex justify-between mt-4">
                 <Link
                   href={`/medicine/${medicine._id}`}
-                  className="bg-blue-700 text-white py-1 px-3 rounded hover:bg-blue-800"
+                  className="bg-red-100 text-black py-1 px-3 rounded-full hover:bg-red-200"
                 >
                   Details
                 </Link>
@@ -225,7 +269,7 @@ const AllMedicinesPage = () => {
                       })
                     )
                   }
-                  className={`py-1 px-3 rounded text-white ${
+                  className={`py-1 px-3 rounded-full text-white ${
                     isInCart || isOutOfStock
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-green-600 hover:bg-green-700"

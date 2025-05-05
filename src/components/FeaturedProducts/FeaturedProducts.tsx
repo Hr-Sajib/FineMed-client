@@ -1,23 +1,52 @@
+
 "use client";
 
 import { addToCart } from "@/redux/features/cart/cartSlice";
 import { useGetMedicineQuery } from "@/redux/features/medicine/featureMedicineApi";
-import { useAppDispatch } from "@/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { IMedicine } from "@/types";
-import { ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+// Skeleton component for a single medicine card
+const MedicineCardSkeleton = () => {
+  return (
+    <div className="border border-gray-200 shadow-md rounded-md overflow-hidden p-4 animate-pulse">
+      <div className="relative w-full h-[200px] mb-4 rounded-md overflow-hidden bg-gray-200"></div>
+      <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+      <div className="flex gap-0">
+        <div className="h-5 bg-gray-200 rounded w-16"></div>
+        <div className="h-5 bg-gray-200 rounded w-24"></div>
+      </div>
+      <div className="flex gap-0 mt-1">
+        <div className="h-5 bg-gray-200 rounded w-20"></div>
+        <div className="h-5 bg-gray-200 rounded w-16"></div>
+      </div>
+      <div className="h-6 bg-gray-200 rounded w-1/4 mt-2"></div>
+      <div className="flex gap-2 mt-2">
+        <div className="h-5 bg-gray-200 rounded w-20"></div>
+        <div className="h-5 bg-gray-200 rounded w-6"></div>
+      </div>
+      <div className="flex justify-between mt-4">
+        <div className="h-8 bg-gray-200 rounded-full w-20"></div>
+        <div className="h-8 bg-gray-200 rounded-full w-28"></div>
+      </div>
+    </div>
+  );
+};
+
 export default function FeaturedProducts() {
+  // Destructure the nested data field and rename it to medicineData
   const {
-    data: medicineData,
+    data: { data: medicineData = [] } = {},
     isLoading,
     error,
   } = useGetMedicineQuery(undefined);
   const [quantity] = useState(1);
   const dispatch = useAppDispatch();
+  const cartItems = useAppSelector((state) => state.cart.items);
 
   const handleAddToCart = (medicine: IMedicine) => {
     if (!medicine) {
@@ -31,7 +60,7 @@ export default function FeaturedProducts() {
         name: medicine.name,
         price: medicine.price,
         quantity,
-        stockQuantity: 1,
+        stockQuantity: medicine.quantity || 1,
         image: medicine.image,
         prescriptionRequired: medicine.prescriptionRequired,
         generic: medicine.generic,
@@ -44,57 +73,95 @@ export default function FeaturedProducts() {
         expiryDate: medicine.expiryDate,
       })
     );
-    toast.success(`${medicine.name || "Medicine"} added to cart!`);
+    toast.success(`${medicine.name} added to cart!`);
   };
 
-  if (isLoading) return <div className="text-center">Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="bg-white container mx-auto lg:my-48 my-30">
+        <h3 className="text-gray-800 text-3xl font-bold px-4 border-l-4 border-teal-600 mb-6">
+          <span className="text-teal-600">Featured</span> Medicine
+        </h3>
+        {/* Skeleton Grid */}
+        <div className="grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-2">
+          {[...Array(4)].map((_, index) => (
+            <MedicineCardSkeleton key={index} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   if (error) return <div>Error loading medicines</div>;
 
   return (
-    <div className="bg-white container mx-auto mb-20">
+    <div className="bg-white container mx-auto lg:my-48 my-30">
       <h3 className="text-gray-800 text-3xl font-bold px-4 border-l-4 border-teal-600 mb-6">
         <span className="text-teal-600">Featured</span> Medicine
       </h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {medicineData?.data?.slice(0, 6).map((medicine: IMedicine) => {
+
+      {/* 🧾 Medicines Grid */}
+      <div className="grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-2">
+        {medicineData.slice(0,12).map((medicine: IMedicine) => {
+          const isInCart = cartItems.some((item) => item._id === medicine._id);
           const isOutOfStock = medicine.quantity === 0;
 
           return (
             <div
-              className="bg-white rounded-lg shadow-2xl p-4"
-              key={medicine?._id}
+              key={medicine._id}
+              className="border border-gray-200 shadow-md rounded-md overflow-hidden p-4"
             >
-              <div className="flex justify-center">
+              <div className="relative w-full h-[200px] mb-4 rounded-md overflow-hidden">
                 <Image
-                  src={medicine?.image || "/default-medicine.jpg"}
-                  alt={medicine.name || "Medicine"}
-                  width={200}
-                  height={200}
+                  src={medicine.image}
+                  alt={medicine.name}
+                  fill
+                  style={{ objectFit: "cover" }}
+                  className="rounded-md"
                 />
               </div>
-              <div className="mt-4 leading-6">
-                <h4 className="text-xl">Name: {medicine?.name || "Unknown"}</h4>
-                <p>Brand: {medicine?.brand || "Unknown"}</p>
-                <p>Price: ${(medicine?.price || 0).toFixed(2)}</p>
-                <p>Category: {medicine?.category || "Unknown"}</p>
+
+              <h3 className="font-semibold text-lg text-gray-800 mb-2">
+                {medicine.name}
+              </h3>
+
+              <div className="flex gap-0">
+                <p className="bg-blue-100 px-2">Generic -</p>
+                <p className="bg-blue-100 px-2">{medicine.generic}</p>
               </div>
-              <div className="mt-4 flex justify-between items-center">
+
+              <div className="flex gap-0 mt-1">
+                <p className="bg-red-800 text-white px-2">Category</p>
+                <p className="bg-red-100 px-2">{medicine.category}</p>
+              </div>
+
+              <p className="text-xl font-bold text-blue-600 mt-2">
+                ${medicine.price}
+              </p>
+              <div className="flex gap-2">
+                <p>Prescription</p>
+                <p className="text-2xl relative bottom-1 text-red-600">
+                  {medicine.prescriptionRequired ? "✔" : "✘"}
+                </p>
+              </div>
+
+              <div className="flex justify-between mt-4">
                 <Link
-                  className="text-teal-600 font-bold"
                   href={`/medicine/${medicine._id}`}
+                  className="bg-red-100 text-black py-1 px-3 rounded-full hover:bg-red-200"
                 >
-                  See More Details...
+                  Details
                 </Link>
                 <button
+                  disabled={isInCart || isOutOfStock}
                   onClick={() => handleAddToCart(medicine)}
-                  disabled={isOutOfStock}
-                  className={`flex items-center gap-2 py-3 px-8 rounded-xl text-lg font-semibold shadow-md text-white ${
-                    isOutOfStock
+                  className={`py-1 px-3 rounded-full text-white ${
+                    isInCart || isOutOfStock
                       ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-gradient-to-r from-[#68d391] to-[#4fd1c5] hover:from-[#48bb78] hover:to-[#38b2ac] transition-all"
+                      : "bg-green-600 hover:bg-green-700"
                   }`}
                 >
-                  <ShoppingCart /> {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+                  {isInCart ? "Added" : isOutOfStock ? "Out of Stock" : "Add to Cart"}
                 </button>
               </div>
             </div>
@@ -102,14 +169,12 @@ export default function FeaturedProducts() {
         })}
       </div>
       <div className="mt-10 flex justify-center">
-        <button>
-          <Link
-            className="flex items-center gap-2 bg-gradient-to-r from-[#68d391] to-[#4fd1c5] hover:from-[#48bb78] hover:to-[#38b2ac] transition-all text-white py-3 px-8 rounded-xl text-lg font-semibold shadow-md"
-            href="/shop"
-          >
-            View More Medicine...
-          </Link>
-        </button>
+        <Link
+          className="flex items-center gap-2 text-blue-700 text-lg"
+          href="/shop"
+        >
+          View More Medicine...
+        </Link>
       </div>
     </div>
   );

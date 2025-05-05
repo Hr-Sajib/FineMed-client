@@ -1,6 +1,6 @@
 const Branding = () => {
   return (
-    <section className="bg-[url('/images/medicine.jpg')] bg-fixed w-full h-80 bg-no-repeat bg-center bg-cover px-4 text-center shadow-md mb-20 relative">
+    <section className="bg-[url('/images/medic.jpg')] bg-fixed w-full lg:h-80 h-[22vh] bg-no-repeat bg-center bg-cover px-4 text-center shadow-md mb-20 relative">
       <div className="bg-gradient-to-tr from-[#4fd1c57a] to-[#000000d4] w-full h-full absolute left-0"></div>
       <div className="container mx-auto">
         <div className="relative top-2 md:top-20">

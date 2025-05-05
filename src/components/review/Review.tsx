@@ -31,7 +31,7 @@ const Review = () => {
   console.log(reviewData);
 
   return (
-    <div className="container bg-white mx-auto p-4 mb-20 mt-40">
+    <div className="container bg-white mx-auto p-4 mb-20 mt-10">
       {/* testimonial title */}
       <h2 className="text-2xl md:text-3xl font-bold mb-6 border-l-4 border-[#16a085] px-4">
         <span className="text-[#16a085]">What say</span> our client?

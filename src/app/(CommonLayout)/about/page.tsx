@@ -5,14 +5,14 @@ import React from 'react'
 export default function AboutUs() {
     return (
        <div className='min-h-[70vh]'>
-         <div className="grid grid-cols-1 lg:grid-cols-2 container mx-auto mt-10 gap-8 px-5 mb-20">
+         <div className="grid grid-cols-1 lg:grid-cols-2 container mx-auto mt-10 gap-8 px-5">
           
           
           <div className="relative flex justify-center lg:justify-end">
         
             <div className="relative w-full lg:w-3/4 h-[400px]">
               <Image
-                src="https://plus.unsplash.com/premium_photo-1668487826666-baa00865bc13?q=80&w=1412&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                src="https://i.postimg.cc/fTRNVQCv/buyMed.jpg"
                 alt="About Image 1"
                 fill
                 className="rounded-tr-2xl rounded-bl-2xl object-cover"
