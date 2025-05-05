@@ -9,6 +9,7 @@ import AboutUs from "./about/page";
 import Review from "@/components/review/Review";
 import ContactUs from "@/components/extra/ContactUs";
 import DiscountCouponSection from "@/components/extra/DiscountCouponSection";
+import BMICalculatorSection from "@/components/extra/BMICalculatorSection";
 
 const HomePageClient = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -45,6 +46,7 @@ const HomePageClient = () => {
       <FeaturedProducts />
       <AboutUs />
       <DiscountCouponSection/>
+      <BMICalculatorSection/>
       <ContactUs/>
       <Review />
     </div>
