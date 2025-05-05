@@ -7,6 +7,8 @@ import Branding from "@/components/branding/page";
 import FeaturedProducts from "@/components/FeaturedProducts/FeaturedProducts";
 import AboutUs from "./about/page";
 import Review from "@/components/review/Review";
+import ContactUs from "@/components/extra/ContactUs";
+import DiscountCouponSection from "@/components/extra/DiscountCouponSection";
 
 const HomePageClient = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,6 +44,8 @@ const HomePageClient = () => {
       <Branding />
       <FeaturedProducts />
       <AboutUs />
+      <DiscountCouponSection/>
+      <ContactUs/>
       <Review />
     </div>
   );

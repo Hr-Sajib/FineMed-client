@@ -12,6 +12,7 @@
     "@reduxjs/toolkit": "^2.7.0",
     "aos": "^2.3.4",
     "axios": "^1.8.4",
+    "emailjs-com": "^3.2.0",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.488.0",
     "moment": "^2.30.1",

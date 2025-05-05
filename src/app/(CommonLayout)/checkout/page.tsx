@@ -45,7 +45,7 @@ const CheckoutPage = () => {
 
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
-  const [phone, setPhone] = useState("");
+  const [phone] = useState("");
   const [paymentMethod, setPaymentMethod] = useState<"cashOnDelivery" | "sslcommerz">("cashOnDelivery");
   const [prescription, setPrescription] = useState<File | null>(null);
   const [prescriptionRequiredState, setPrescriptionRequiredState] = useState(false);
@@ -310,7 +310,7 @@ const CheckoutPage = () => {
                 {paymentMethod === "cashOnDelivery" ? (
                   <button
                     onClick={handleCODOrder}
-                    className="w-full mt-6 bg-teal-600 hover:bg-teal-700 text-white py-3 rounded-lg text-lg font-semibold"
+                    className="w-full mt-6 bg-teal-600 hover:bg-teal-700 text-white py-3 rounded-full text-lg font-semibold"
                     disabled={isLoading}
                   >
                     {isLoading ? "Processing..." : "Confirm Order"}
@@ -351,18 +351,29 @@ const CheckoutPage = () => {
                     placeholder="Phone Number"
                     className="w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-teal-400"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
+                    onChange={(e) => setAddress(e.target.value)}
                   />
                   <div>
-                    <label className="block mb-2 font-medium">
+                    <label htmlFor="prescription-upload" className="block mb-2 font-medium">
                       Upload Prescription (
                       {prescriptionRequiredState ? "Required" : "Optional"})
                     </label>
-                    <input
-                      type="file"
-                      onChange={handleFileChange}
-                      className="w-full px-4 py-2 border rounded-full"
-                    />
+                    <div className="relative">
+                      <input
+                        type="file"
+                        onChange={handleFileChange}
+                        className="opacity-0 absolute w-full h-full cursor-pointer"
+                        aria-label="Upload prescription"
+                        id="prescription-upload"
+                      />
+                      <div
+                        className={`w-full px-4 py-2 border rounded-full ${
+                          prescription ? "bg-teal-50" : "bg-white"
+                        } text-gray-500 flex items-center justify-between`}
+                      >
+                        <span>{prescription ? `📂 File Choosen » ${prescription.name.slice(0,40)} ...` : "Choose File"}</span>
+                      </div>
+                    </div>
                   </div>
                   <div ref={dropdownRef} className="relative">
                     <label className="block mb-2 font-medium">Payment Method</label>
