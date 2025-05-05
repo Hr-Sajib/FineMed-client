@@ -1,38 +1,79 @@
+
 "use client";
+
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import { Pagination } from "swiper/modules";
 import { MessageSquareQuote } from "lucide-react";
-
-interface Review {
-  id: string;
-  reviewText: string;
-  userName: string;
-  userEmail: number;
-}
 import { useGetReviewQuery } from "@/redux/features/reveiw/reveiwApi";
 import moment from "moment";
 
+// Define the review interface
 interface TReview {
   _id: string;
   userName: string;
   userEmail: string;
   reviewText: string;
   starCount: number;
-  orderCount?: number; // optional if not always present
+  orderCount?: number;
   createdAt: string;
   updatedAt: string;
 }
 
-const Review = () => {
-  const { data: reviewData } = useGetReviewQuery(undefined);
+// Skeleton component for a single review card
+const ReviewCardSkeleton = () => {
+  return (
+    <div className="p-6 rounded-lg shadow-lg bg-white animate-pulse">
+      <div className="flex justify-center mb-4">
+        <div className="h-6 w-6 bg-gray-200 rounded-full"></div>
+      </div>
+      <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto mb-4"></div>
+      <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto mb-4"></div>
+      <div className="flex justify-center mb-4">
+        <div className="h-5 bg-gray-200 rounded w-24"></div>
+      </div>
+      <div className="flex justify-center gap-4 mb-4">
+        <div className="h-5 bg-gray-200 rounded w-20"></div>
+        <div className="h-5 bg-gray-200 rounded w-32"></div>
+      </div>
+      <div className="h-4 bg-gray-200 rounded w-16 mx-auto"></div>
+    </div>
+  );
+};
 
-  console.log(reviewData);
+const Review = () => {
+  const { data: reviewData, isLoading, error } = useGetReviewQuery(undefined);
+
+  if (isLoading) {
+    return (
+      <div className="container bg-white mx-auto p-4 mb-20 mt-10">
+        <h2 className="text-2xl md:text-3xl font-bold mb-6 border-l-4 border-[#16a085] px-4">
+          <span className="text-[#16a085]">What say</span> our client?
+        </h2>
+        <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-6">
+          {[...Array(3)].map((_, index) => (
+            <ReviewCardSkeleton key={index} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !reviewData?.data?.length) {
+    return (
+      <div className="container bg-white mx-auto p-4 mb-20 mt-10">
+        <h2 className="text-2xl md:text-3xl font-bold mb-6 border-l-4 border-[#16a085] px-4">
+          <span className="text-[#16a085]">What say</span> our client?
+        </h2>
+        <p className="text-center text-gray-500">No reviews available.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container bg-white mx-auto p-4 mb-20 mt-10">
-      {/* testimonial title */}
+      {/* Testimonial title */}
       <h2 className="text-2xl md:text-3xl font-bold mb-6 border-l-4 border-[#16a085] px-4">
         <span className="text-[#16a085]">What say</span> our client?
       </h2>
@@ -41,53 +82,61 @@ const Review = () => {
         spaceBetween={30}
         pagination={{
           clickable: true,
+          bulletClass: "swiper-pagination-bullet bg-gray-300",
+          bulletActiveClass: "swiper-pagination-bullet-active bg-[#16a085]",
         }}
         modules={[Pagination]}
         breakpoints={{
           320: {
             slidesPerView: 1,
+            spaceBetween: 10,
           },
           640: {
             slidesPerView: 2,
+            spaceBetween: 20,
           },
           1024: {
             slidesPerView: 3,
+            spaceBetween: 30,
           },
         }}
-        className="grid grid-cols-1 md:grid-cols-2 bg-white lg:grid-cols-3"
+        className="pb-12"
       >
-        {/* client riview card */}
-        {reviewData?.data?.map((review: TReview) => (
+        {/* Client review card */}
+        {reviewData.data.map((review: TReview) => (
           <SwiperSlide
-            className="p-4 rounded-lg shadow-2xl bg-white mb-12 h-20"
-            key={review?._id}
+            key={review._id}
+            className="p-6 border border-gray-100 bg-[#e6f4f1] rounded-lg shadow-lg  hover:shadow-xl transition-shadow duration-300 hover:scale-105"
           >
-            {/* client review */}
-            <div className="flex justify-center">
-              <p className="flex gap-4">
-                <MessageSquareQuote className="text-[#16a085] mb-4" />
-                Review:{review?.reviewText}
-              </p>
+            {/* Client review */}
+            <div className="flex justify-center mb-4 h-10">
+              <MessageSquareQuote className="text-[#16a085] h-8 w-8" />
             </div>
-            <p className="mb-2 flex justify-center">
-              <span className="text-yellow-500 ml-2 flex">
+            <p className="text-center mb-4 italic font-bold text-blue-500">
+            &ldquo;{review.reviewText}&rdquo;
+            </p>
+            <div className="flex justify-center mb-4">
+              <span className="text-yellow-500 text-lg flex">
                 {Array.from({ length: 5 }).map((_, index) => (
                   <span key={index}>
-                    {index < review?.starCount ? "★" : "☆"}
+                    {index < review.starCount ? "★" : "☆"}
                   </span>
                 ))}
               </span>
-            </p>
-            {/* rating date */}
-            <div className="flex justify-center items-center gap-4">
-              <h4 className="text-xl mb-2">{review?.userName}</h4> |
-              <p className="mb-2">Email: {review?.userEmail}</p>
             </div>
-            <p className="mb-2 flex justify-center">
-              Total Order: {review?.orderCount}
+            {/* User info */}
+            <div className="flex justify-center items-center gap-4 mb-4">
+              <h4 className="text-lg text-gray-800">
+              {review.userName}
+              </h4>
+              <span className="text-gray-400">|</span>
+              <p className="text-sm text-gray-500">{review.userEmail}</p>
+            </div>
+            <p className="text-sm text-gray-600 text-center mb-2 bg-white rounded-full">
+              Total Orders {review.orderCount || 0}
             </p>
-            <p className="mb-2 text-xs flex justify-center text-teal-600">
-              Date: {moment(review?.createdAt).format("MMMM D, YYYY")}
+            <p className="text-xl text-[#16a085] text-center">
+              {moment(review.createdAt).format("MMMM D, YYYY")}
             </p>
           </SwiperSlide>
         ))}

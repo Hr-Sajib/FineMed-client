@@ -65,7 +65,7 @@ const CartPage = () => {
               <div className="flex justify-end mb-4">
                 <button
                   onClick={handleClearCart}
-                  className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-semibold transition"
+                  className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition"
                 >
                   Clear Cart
                 </button>
@@ -112,7 +112,7 @@ const CartPage = () => {
                     </div>
 
                     <div className="flex items-center gap-6">
-                      <div className="flex flex-col items-center">
+                      <div className="flex gap-5 items-center">
                         <label
                           htmlFor={`quantity-${item._id}`}
                           className="text-sm text-gray-700 mb-2 font-semibold"
@@ -128,13 +128,13 @@ const CartPage = () => {
                           onChange={(e) =>
                             handleQuantityChange(item._id!, Number(e.target.value))
                           }
-                          className="w-24 text-center rounded-lg border-2 border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
+                          className="w-24 text-center rounded-lg border border-gray-300 p-3 focus:outline-none focus:ring-2 focus:ring-teal-500 transition"
                         />
                       </div>
 
                       <button
                         onClick={() => handleRemove(item._id!)}
-                        className="bg-red-500 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-red-600 transition"
+                        className="bg-red-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 transition"
                       >
                         Remove
                       </button>

@@ -1,15 +1,17 @@
+
 "use client";
 
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { toast } from "sonner"; // Switched to sonner
+import { toast } from "sonner";
 import { clearCart } from "@/redux/features/cart/cartSlice";
 import { selectCurrentUser } from "@/redux/features/auth/authSlice";
 import { useCreateOrderMutation } from "@/redux/features/order/orderApi";
 import { postImage } from "@/utils/postImage";
 import { ProtectedRoute } from "@/components/protectedRoutes/ProtectedRouteProps";
+import { ChevronDown } from "lucide-react";
 
 // Define custom error type to handle RTK Query error shapes
 interface OrderError {
@@ -41,23 +43,26 @@ const CheckoutPage = () => {
 
   const [createOrder, { isLoading, error }] = useCreateOrderMutation();
 
-  useEffect(()=>{
-    if(error){
-      console.log("error: ",error)
-    }
-  })
-
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
+  const [paymentMethod, setPaymentMethod] = useState<"cashOnDelivery" | "sslcommerz">("cashOnDelivery");
   const [prescription, setPrescription] = useState<File | null>(null);
   const [prescriptionRequiredState, setPrescriptionRequiredState] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const total = items.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
+  const total = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+  // Mapping for display values to IOrderData values
+  const optionToValue: { [key: string]: "cashOnDelivery" | "sslcommerz" } = {
+    "Cash on Delivery": "cashOnDelivery",
+    "Online Payment": "sslcommerz",
+  };
+  const valueToOption: { [key: string]: string } = {
+    cashOnDelivery: "Cash on Delivery",
+    sslcommerz: "Online Payment",
+  };
 
   useEffect(() => {
     const needPrescription = items.some((item) => item.prescriptionRequired);
@@ -66,10 +71,23 @@ const CheckoutPage = () => {
 
   useEffect(() => {
     if (error) {
+      console.log("error: ", error);
       const orderError = error as OrderError;
       toast(`❌ Order error: ${orderError.data?.message || orderError.message || "Unknown error"}`);
     }
   }, [error]);
+
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (isDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [isDropdownOpen]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -78,7 +96,6 @@ const CheckoutPage = () => {
   };
 
   const handleCODOrder = async () => {
-
     if (!authUser?.userEmail) {
       toast("❌ Please log in to place an order");
       return;
@@ -130,7 +147,6 @@ const CheckoutPage = () => {
       if (result.success) {
         dispatch(clearCart());
         toast("✅ Order placed successfully!");
-
       } else {
         throw new Error("Order creation failed");
       }
@@ -138,7 +154,8 @@ const CheckoutPage = () => {
       const orderError = error as OrderError;
       console.error("Failed to create order:", error);
       toast(
-        `❌ Order creation failed: ${orderError.data?.message || orderError.message || "Unknown error"}`);
+        `❌ Order creation failed: ${orderError.data?.message || orderError.message || "Unknown error"}`
+      );
     }
   };
 
@@ -205,9 +222,10 @@ const CheckoutPage = () => {
       }
     } catch (error) {
       const orderError = error as OrderError;
-      // console.error("Failed to create order or initiate payment:", error);
+      console.error("Failed to create order or initiate payment:", error);
       toast(
-        `❌ Payment initiation failed: ${orderError.data?.message || orderError.message || "Unknown error"}`);
+        `❌ Payment initiation failed: ${orderError.data?.message || orderError.message || "Unknown error"}`
+      );
     }
   };
 
@@ -244,7 +262,7 @@ const CheckoutPage = () => {
             </h1>
 
             <div className="grid md:grid-cols-2 gap-10">
-              {/* Cart Summary FIRST */}
+              {/* Cart Summary */}
               <div className="bg-gray-50 p-6 rounded-lg shadow-inner">
                 <h2 className="text-xl font-semibold mb-4 text-teal-700">
                   Order Summary
@@ -289,7 +307,7 @@ const CheckoutPage = () => {
                   </p>
                 </div>
 
-                {paymentMethod === "Cash on Delivery" ? (
+                {paymentMethod === "cashOnDelivery" ? (
                   <button
                     onClick={handleCODOrder}
                     className="w-full mt-6 bg-teal-600 hover:bg-teal-700 text-white py-3 rounded-lg text-lg font-semibold"
@@ -308,7 +326,7 @@ const CheckoutPage = () => {
                 )}
               </div>
 
-              {/* Shipping Form SECOND */}
+              {/* Shipping Details */}
               <div className="bg-gray-50 p-6 rounded-lg shadow-inner">
                 <h2 className="text-xl font-semibold mb-4 text-teal-700">
                   Shipping Details
@@ -317,21 +335,21 @@ const CheckoutPage = () => {
                   <input
                     type="text"
                     placeholder="Full Name"
-                    className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-teal-400"
+                    className="w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-teal-400"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                   />
                   <input
                     type="text"
                     placeholder="Address"
-                    className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-teal-400"
+                    className="w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-teal-400"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                   />
                   <input
                     type="text"
                     placeholder="Phone Number"
-                    className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-teal-400"
+                    className="w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-teal-400"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                   />
@@ -343,21 +361,46 @@ const CheckoutPage = () => {
                     <input
                       type="file"
                       onChange={handleFileChange}
-                      className="w-full p-2 border rounded"
+                      className="w-full px-4 py-2 border rounded-full"
                     />
                   </div>
-                  <div>
-                    <label className="block mb-2 font-medium">
-                      Payment Method
-                    </label>
-                    <select
-                      value={paymentMethod}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-teal-400"
+                  <div ref={dropdownRef} className="relative">
+                    <label className="block mb-2 font-medium">Payment Method</label>
+                    <div
+                      className="w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white flex items-center justify-between cursor-pointer"
+                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                      aria-label="Select payment method"
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          setIsDropdownOpen(!isDropdownOpen);
+                        }
+                      }}
                     >
-                      <option>Cash on Delivery</option>
-                      <option>Online Payment</option>
-                    </select>
+                      <span>{valueToOption[paymentMethod]}</span>
+                      <ChevronDown className="w-5 h-5 text-gray-500" />
+                    </div>
+                    {isDropdownOpen && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-3xl shadow-md">
+                        <ul className="py-1">
+                          {["Cash on Delivery", "Online Payment"].map((option) => (
+                            <li
+                              key={option}
+                              className="px-4 py-2 hover:bg-teal-50 cursor-pointer"
+                              onClick={() => {
+                                setPaymentMethod(optionToValue[option]);
+                                setIsDropdownOpen(false);
+                              }}
+                              role="option"
+                              aria-selected={valueToOption[paymentMethod] === option}
+                            >
+                              {option}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

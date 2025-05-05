@@ -1,5 +1,6 @@
 
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import Image from "next/image";
 import Link from "next/link";
@@ -204,7 +205,7 @@ const AllMedicinesPage = () => {
           return (
             <div
               key={medicine._id}
-              className="border border-gray-200 shadow-md rounded-md overflow-hidden p-4"
+              className=" bg-[#e6f4f1] shadow-md rounded-md overflow-hidden p-4"
             >
               <div className="relative w-full h-[200px] mb-4 rounded-md overflow-hidden">
                 <Image
@@ -220,14 +221,14 @@ const AllMedicinesPage = () => {
                 {medicine.name}
               </h3>
 
-              <div className="flex gap-0">
-                <p className="bg-blue-100 px-2">Generic -</p>
-                <p className="bg-blue-100 px-2">{medicine.generic}</p>
+              <div className="flex gap-0 mb-1">
+                    <p className="bg-red-800 text-white px-2">Generic -</p>
+                    <p className="bg-red-100 px-2">{medicine.generic}</p>
               </div>
 
-              <div className="flex gap-0 mt-1">
-                <p className="bg-red-800 text-white px-2">Category</p>
-                <p className="bg-red-100 px-2">{medicine.category}</p>
+              <div className="flex gap-0">
+                    <p className="bg-blue-100 px-2">Category</p>
+                    <p className="bg-blue-100 px-2">{medicine.category}</p>
               </div>
 
               <p className="text-xl font-bold text-blue-600 mt-2">
@@ -243,7 +244,7 @@ const AllMedicinesPage = () => {
               <div className="flex justify-between mt-4">
                 <Link
                   href={`/medicine/${medicine._id}`}
-                  className="bg-red-100 text-black py-1 px-3 rounded-full hover:bg-red-200"
+                  className="bg-red-200 text-black py-1 px-3 rounded-full hover:bg-red-200"
                 >
                   Details
                 </Link>

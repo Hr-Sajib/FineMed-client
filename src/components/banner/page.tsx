@@ -70,7 +70,7 @@ const Banner = () => {
         <SwiperSlide className="relative">
           <div className="absolute inset-0 bg-black/40 z-10"></div>
           <Image
-            src="https://images.unsplash.com/photo-1471864190281-a93a3070b6de?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            src="https://i.postimg.cc/vBW4ZxMT/mediShop.jpg"
             alt="Healthcare Essentials"
             fill
             className="object-cover"

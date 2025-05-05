@@ -70,13 +70,13 @@ const Footer = () => {
                 </span>
               </li>
               <li className="flex gap-4">
-                <Link href="https://www.facebook.com/">
+                <Link href="https://www.facebook.com/" className=" hover:text-teal-500">
                   <Facebook />
-                </Link>
-                <Link href="https://www.instagram.com/">
+                </Link >
+                <Link href="https://www.instagram.com/" className=" hover:text-teal-500">
                   <Instagram />
                 </Link>
-                <Link href="https://x.com/?lang=en">
+                <Link href="https://x.com/?lang=en" className=" hover:text-teal-500">
                   <Twitter />
                 </Link>
               </li>
