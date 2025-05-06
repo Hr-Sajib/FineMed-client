@@ -58,7 +58,7 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className={`${user?.role == 'admin' ? 'bg-teal-50' : 'bg-white'} shadow-md sticky top-0 z-50 w-full`}>
+    <nav className={`${user?.role == 'admin' ? 'bg-teal-50' : 'bg-white'} shadow-md sticky top-0 z-90 w-full`}>
       <div className=" mx-auto px-4 sm:px-6 lg:px-[8vw]">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -109,13 +109,13 @@ const Navbar = () => {
                   {megaMenuOpen && (
                     <div className="absolute left-0 mt-2 w-[300px] bg-teal-600  shadow-lg rounded-md z-50 p-6">
                       {shopCategories.map((category) => (
-                        <div key={category.title}>
+                        <div key={category.title} className="">
                           <h3 className="font-semibold text-white mb-2">
                             {category.title}
                           </h3>
-                          <ul className="space-y-1">
+                          <ul className="space-y-1 ">
                             {category.items.map((item) => (
-                              <li key={item.href}>
+                              <li key={item.href} className="">
                                 <Link
                                   href={item.href}
                                   className="text-white hover:font-bold"

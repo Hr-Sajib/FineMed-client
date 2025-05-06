@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useGetAllMedicinesQuery } from "@/redux/features/medicine/medicineApi";
 import { selectMedicines, setMedicines } from "@/redux/features/medicine/medicineSlice";
 import { addToCart, selectCart } from "@/redux/features/cart/cartSlice";
+import { FiMenu, FiX } from "react-icons/fi";
 import { IMedicine } from "@/types";
 
 // Define the expected response type for the query
@@ -19,18 +20,18 @@ interface MedicinesResponse {
 
 const MedicineCardSkeleton = () => {
   return (
-    <div className="border border-gray-200 shadow-md rounded-md overflow-hidden p-4 animate-pulse">
+    <div className="border border-gray-200 shadow-md rounded-xl overflow-hidden p-6 animate-pulse">
       <div className="relative w-full h-[200px] mb-4 rounded-md overflow-hidden bg-gray-200"></div>
-      <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+      <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
       <div className="flex gap-0">
         <div className="h-5 bg-gray-200 rounded w-16"></div>
         <div className="h-5 bg-gray-200 rounded w-24"></div>
       </div>
-      <div className="flex gap-0 mt-1">
+      <div className="flex gap-0 mt-2">
         <div className="h-5 bg-gray-200 rounded w-20"></div>
         <div className="h-5 bg-gray-200 rounded w-16"></div>
       </div>
-      <div className="h-6 bg-gray-200 rounded w-1/4 mt-2"></div>
+      <div className="h-6 bg-gray-200 rounded w-1/4 mt-3"></div>
       <div className="flex gap-2 mt-2">
         <div className="h-5 bg-gray-200 rounded w-20"></div>
         <div className="h-5 bg-gray-200 rounded w-6"></div>
@@ -58,6 +59,7 @@ const AllMedicinesPage = () => {
   const [filterForm, setFilterForm] = useState("");
   const [filterPrescription, setFilterPrescription] = useState("");
   const [sortPrice, setSortPrice] = useState("");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const { data, isLoading, error } = useGetAllMedicinesQuery({
     search: search || undefined,
@@ -112,12 +114,11 @@ const AllMedicinesPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-[70vh] py-8 px-4 lg:w-[80vw] mx-auto mt-10">
-        <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">
+      <div className="min-h-[70vh] py-12 px-6 lg:px-8 max-w-7xl mx-auto mt-6">
+        <h2 className="text-3xl font-semibold text-gray-800 text-center mb-8">
           All Medicines
         </h2>
-        {/* Skeleton Grid */}
-        <div className="grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-6">
+        <div className="grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-6 sm:gap-8 lg:gap-10">
           {[...Array(8)].map((_, index) => (
             <MedicineCardSkeleton key={index} />
           ))}
@@ -128,160 +129,216 @@ const AllMedicinesPage = () => {
 
   if (error)
     return (
-      <div className="min-h-[70vh] text-center py-8 text-red-600">
+      <div className="min-h-[70vh] text-center py-12 px-6 text-red-600 max-w-7xl mx-auto mt-6">
         Error loading medicines: {JSON.stringify(error)}
       </div>
     );
 
   return (
-    <div className="min-h-[70vh] py-8 px-4 lg:w-[80vw] mx-auto mt-10">
-      <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">
+    <div className="min-h-[70vh] py-12 px-6 lg:px-8 max-w-7xl mx-auto mt-6">
+      <h2 className="text-3xl font-semibold text-gray-800 text-center mb-8">
         All Medicines
       </h2>
 
-      {/* 🔍 Search and Filter */}
-      <div className="flex flex-col md:flex-row flex-wrap justify-between items-center gap-4 mb-8">
-        <input
-          type="text"
-          placeholder="Search medicines..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border border-gray-300 rounded px-4 py-2 w-full md:w-1/3"
-        />
-
-        <select
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-          className="border border-gray-300 rounded px-4 py-2 w-full md:w-1/4"
+      <div className="flex flex-col md:flex-row gap-6 lg:gap-8">
+        {/* Sidebar Toggle Button (Mobile) */}
+        <button
+          className="md:hidden fixed top-4 left-4 bg-teal-600 text-white p-3 rounded-full flex items-center justify-center z-50"
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          aria-expanded={isSidebarOpen}
+          aria-controls="sidebar"
         >
-          <option value="">All Categories</option>
-          <option value="Antibiotic">Antibiotic</option>
-          <option value="Painkiller">Painkiller</option>
-          <option value="Antacid">Antacid</option>
-          <option value="Antiseptic">Antiseptic</option>
-          <option value="Antiviral">Antiviral</option>
-        </select>
+          {isSidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+        </button>
 
-        <select
-          value={filterForm}
-          onChange={(e) => setFilterForm(e.target.value)}
-          className="border border-gray-300 rounded px-4 py-2 w-full md:w-1/4"
+        {/* Sidebar */}
+        <div
+          id="sidebar"
+          className={`${
+            isSidebarOpen ? "block" : "hidden"
+          } md:block w-full md:w-64 lg:w-72 max-w-xs bg-white fixed p-4 md:p-6 rounded-xl shadow-md space-y-4 md:space-y-6 mt-12 md:mt-0`}
         >
-          <option value="">All Forms</option>
-          <option value="Capsule">Capsule</option>
-          <option value="Tablet">Tablet</option>
-          <option value="Liquid">Liquid</option>
-          <option value="Gel">Gel</option>
-          <option value="Cream">Cream</option>
-        </select>
+          <h3 className="text-lg font-semibold text-teal-700 mb-4">Filters</h3>
 
-        <select
-          value={filterPrescription}
-          onChange={(e) => setFilterPrescription(e.target.value)}
-          className="border border-gray-300 rounded px-4 py-2 w-full md:w-1/4"
-        >
-          <option value="">Prescription Required</option>
-          <option value="Yes">Yes</option>
-          <option value="No">No</option>
-        </select>
+          <div>
+            <label htmlFor="search" className="block text-teal-700 font-semibold mb-2">
+              Search
+            </label>
+            <input
+              id="search"
+              type="text"
+              placeholder="Search medicines..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full px-5 py-3 border border-teal-200 rounded-full bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-400"
+              aria-label="Search medicines"
+            />
+          </div>
 
-        <select
-          value={sortPrice}
-          onChange={(e) => setSortPrice(e.target.value)}
-          className="border border-gray-300 rounded px-4 py-2 w-full md:w-1/4"
-        >
-          <option value="">Sort by Price</option>
-          <option value="asc">Low to High</option>
-          <option value="desc">High to Low</option>
-        </select>
-      </div>
-
-      {/* 🧾 Medicines Grid */}
-      <div className="grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-6 mb-30">
-        {sortedMedicines.map((medicine) => {
-          const isInCart = cartItems.some((item) => item._id === medicine._id);
-          const isOutOfStock = medicine.quantity === 0;
-
-          return (
-            <div
-              key={medicine._id}
-              className=" bg-[#e6f4f1] shadow-md rounded-md overflow-hidden p-4"
+          <div>
+            <label htmlFor="category" className="block text-teal-700 font-semibold mb-2">
+              Category
+            </label>
+            <select
+              id="category"
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className="w-full px-5 py-3 border border-teal-200 rounded-full bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-400"
+              aria-label="Filter by category"
             >
-              <div className="relative w-full h-[200px] mb-4 rounded-md overflow-hidden">
-                <Image
-                  src={medicine.image}
-                  alt={medicine.name}
-                  fill
-                  style={{ objectFit: "cover" }}
-                  className="rounded-md"
-                />
-              </div>
+              <option value="">All Categories</option>
+              <option value="Antibiotic">Antibiotic</option>
+              <option value="Painkiller">Painkiller</option>
+              <option value="Antacid">Antacid</option>
+              <option value="Antiseptic">Antiseptic</option>
+              <option value="Antiviral">Antiviral</option>
+            </select>
+          </div>
 
-              <h3 className="font-semibold text-lg text-gray-800 mb-2">
-                {medicine.name}
-              </h3>
+          <div>
+            <label htmlFor="form" className="block text-teal-700 font-semibold mb-2">
+              Form
+            </label>
+            <select
+              id="form"
+              value={filterForm}
+              onChange={(e) => setFilterForm(e.target.value)}
+              className="w-full px-5 py-3 border border-teal-200 rounded-full bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-400"
+              aria-label="Filter by form"
+            >
+              <option value="">All Forms</option>
+              <option value="Capsule">Capsule</option>
+              <option value="Tablet">Tablet</option>
+              <option value="Liquid">Liquid</option>
+              <option value="Gel">Gel</option>
+              <option value="Cream">Cream</option>
+            </select>
+          </div>
 
-              <div className="flex gap-0 mb-1">
-                    <p className="bg-red-800 text-white px-2">Generic -</p>
-                    <p className="bg-red-100 px-2">{medicine.generic}</p>
-              </div>
+          <div>
+            <label htmlFor="prescription" className="block text-teal-700 font-semibold mb-2">
+              Prescription
+            </label>
+            <select
+              id="prescription"
+              value={filterPrescription}
+              onChange={(e) => setFilterPrescription(e.target.value)}
+              className="w-full px-5 py-3 border border-teal-200 rounded-full bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-400"
+              aria-label="Filter by prescription requirement"
+            >
+              <option value="">Prescription Required</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
 
-              <div className="flex gap-0">
-                    <p className="bg-blue-100 px-2">Category</p>
-                    <p className="bg-blue-100 px-2">{medicine.category}</p>
-              </div>
+          <div>
+            <label htmlFor="sortPrice" className="block text-teal-700 font-semibold mb-2">
+              Sort by Price
+            </label>
+            <select
+              id="sortPrice"
+              value={sortPrice}
+              onChange={(e) => setSortPrice(e.target.value)}
+              className="w-full px-5 py-3 border border-teal-200 rounded-full bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-400"
+              aria-label="Sort by price"
+            >
+              <option value="">Sort by Price</option>
+              <option value="asc">Low to High</option>
+              <option value="desc">High to Low</option>
+            </select>
+          </div>
+        </div>
 
-              <p className="text-xl font-bold text-blue-600 mt-2">
-                ${medicine.price}
-              </p>
-              <div className="flex gap-2">
-                <p>Prescription</p>
-                <p className="text-2xl relative bottom-1 text-red-600">
-                  {medicine.prescriptionRequired ? "✔" : "✘"}
-                </p>
-              </div>
+        {/* Medicines Grid */}
+        <div className="flex-1 px-4 ml-[20vw]">
+          <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-2 sm:gap-8 lg:gap-3 mb-12">
+            {sortedMedicines.map((medicine) => {
+              const isInCart = cartItems.some((item) => item._id === medicine._id);
+              const isOutOfStock = medicine.quantity === 0;
 
-              <div className="flex justify-between mt-4">
-                <Link
-                  href={`/medicine/${medicine._id}`}
-                  className="bg-red-200 text-black py-1 px-3 rounded-full hover:bg-red-200"
+              return (
+                <div
+                  key={medicine._id}
+                  className="bg-[#e6f4f1] shadow-md rounded-xl overflow-hidden p-6"
                 >
-                  Details
-                </Link>
-                <button
-                  disabled={isInCart || isOutOfStock}
-                  onClick={() =>
-                    dispatch(
-                      addToCart({
-                        _id: medicine._id!,
-                        name: medicine.name,
-                        price: medicine.price,
-                        quantity: 1,
-                        image: medicine.image,
-                        prescriptionRequired: medicine.prescriptionRequired,
-                        generic: medicine.generic,
-                        brand: medicine.brand,
-                        form: medicine.form,
-                        category: medicine.category,
-                        description: medicine.description,
-                        simptoms: medicine.simptoms,
-                        manufacturer: medicine.manufacturer,
-                        expiryDate: medicine.expiryDate,
-                      })
-                    )
-                  }
-                  className={`py-1 px-3 rounded-full text-white ${
-                    isInCart || isOutOfStock
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-green-600 hover:bg-green-700"
-                  }`}
-                >
-                  {isInCart ? "Added" : isOutOfStock ? "Out of Stock" : "Add to Cart"}
-                </button>
-              </div>
-            </div>
-          );
-        })}
+                  <div className="relative w-full h-[200px] mb-4 rounded-md overflow-hidden">
+                    <Image
+                      src={medicine.image}
+                      alt={medicine.name}
+                      fill
+                      style={{ objectFit: "cover" }}
+                      className="rounded-md"
+                    />
+                  </div>
+
+                  <h3 className="font-semibold text-lg text-gray-800 mb-3">
+                    {medicine.name}
+                  </h3>
+
+                  <div className="flex gap-0 mb-2">
+                    <p className="bg-red-800 text-white px-2 py-1">Generic -</p>
+                    <p className="bg-red-100 px-2 py-1">{medicine.generic}</p>
+                  </div>
+
+                  <div className="flex gap-0 mb-2">
+                    <p className="bg-blue-100 px-2 py-1">Category</p>
+                    <p className="bg-blue-100 px-2 py-1">{medicine.category}</p>
+                  </div>
+
+                  <p className="text-xl font-bold text-blue-600 mt-3 mb-2">
+                    ${medicine.price}
+                  </p>
+                  <div className="flex gap-2 mb-3">
+                    <p>Prescription</p>
+                    <p className="text-2xl relative bottom-1 text-red-600">
+                      {medicine.prescriptionRequired ? "✔" : "✘"}
+                    </p>
+                  </div>
+
+                  <div className="flex justify-between mt-4 gap-3">
+                    <Link
+                      href={`/medicine/${medicine._id}`}
+                      className="bg-red-200 text-black py-2 px-4 rounded-full hover:bg-red-300 transition-colors"
+                    >
+                      Details
+                    </Link>
+                    <button
+                      disabled={isInCart || isOutOfStock}
+                      onClick={() =>
+                        dispatch(
+                          addToCart({
+                            _id: medicine._id!,
+                            name: medicine.name,
+                            price: medicine.price,
+                            quantity: 1,
+                            image: medicine.image,
+                            prescriptionRequired: medicine.prescriptionRequired,
+                            generic: medicine.generic,
+                            brand: medicine.brand,
+                            form: medicine.form,
+                            category: medicine.category,
+                            description: medicine.description,
+                            simptoms: medicine.simptoms,
+                            manufacturer: medicine.manufacturer,
+                            expiryDate: medicine.expiryDate,
+                          })
+                        )
+                      }
+                      className={`py-2 px-4 rounded-full text-white ${
+                        isInCart || isOutOfStock
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-green-600 hover:bg-green-700"
+                      } transition-colors`}
+                    >
+                      {isInCart ? "Added" : isOutOfStock ? "Out of Stock" : "Add to Cart"}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -11,6 +11,7 @@ import ContactUs from "@/components/extra/ContactUs";
 import DiscountCouponSection from "@/components/extra/DiscountCouponSection";
 import BMICalculatorSection from "@/components/extra/BMICalculatorSection";
 
+
 const HomePageClient = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();

@@ -11,7 +11,7 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.7.0",
     "aos": "^2.3.4",
-    "axios": "^1.8.4",
+    "axios": "^1.9.0",
     "emailjs-com": "^3.2.0",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.488.0",
@@ -25,6 +25,7 @@
     "react-redux": "^9.2.0",
     "redux-persist": "^6.0.0",
     "sonner": "^2.0.3",
+    "sweetalert2": "^11.21.0",
     "swiper": "^11.2.6"
   },
   "devDependencies": {
