@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useLoginMutation } from "@/redux/features/auth/authApi";
@@ -33,6 +34,7 @@ export default function Login() {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm<LoginFormData>();
 
   const onSubmit = async (data: LoginFormData) => {
@@ -60,6 +62,20 @@ export default function Login() {
     }
   };
 
+  // Handle demo user login
+  const handleDemoUser = () => {
+    setLoginType("email");
+    setValue("emailOrPhone", "akib@finemed.com");
+    setValue("password", "akib@finemed");
+  };
+
+  // Handle demo admin login
+  const handleDemoAdmin = () => {
+    setLoginType("email");
+    setValue("emailOrPhone", "admin@finemed.com");
+    setValue("password", "admin@finemed");
+  };
+
   return (
     <div className="flex flex-col justify-center items-center min-h-[70vh] bg-gray-100">
       <Link href="/">
@@ -76,6 +92,27 @@ export default function Login() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" autoComplete="off">
           <div>
+            {/* Demo User and Demo Admin Buttons */}
+            <div className="flex space-x-2 mb-2">
+              <button
+                type="button"
+                onClick={handleDemoUser}
+                className="px-4 py-2 text-sm font-medium rounded-lg transition duration-200 bg-teal-100 text-teal-700 hover:bg-teal-200"
+                aria-label="Login with demo user credentials"
+              >
+                Demo User
+              </button>
+              <button
+                type="button"
+                onClick={handleDemoAdmin}
+                className="px-4 py-2 text-sm font-medium rounded-lg transition duration-200 bg-teal-100 text-teal-700 hover:bg-teal-200"
+                aria-label="Login with demo admin credentials"
+              >
+                Demo Admin
+              </button>
+            </div>
+
+            {/* Email/Phone Toggle Buttons */}
             <div className="flex space-x-2 mb-2">
               <button
                 type="button"

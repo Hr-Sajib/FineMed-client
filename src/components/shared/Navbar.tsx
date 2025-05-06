@@ -3,29 +3,46 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAppSelector } from "@/redux/hooks";
 import { useSelector, useDispatch } from "react-redux";
 import { selectCurrentUser, logout } from "@/redux/features/auth/authSlice";
 import { toast } from "sonner";
+import { FiUser } from "react-icons/fi";
 
 const Navbar = () => {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const { items } = useAppSelector((state) => state.cart);
   const cartItems = items.length;
   const user = useSelector(selectCurrentUser);
   const dispatch = useDispatch();
+  const profileRef = useRef<HTMLDivElement>(null);
 
-  console.log("user: ",user)
+  console.log("user: ", user);
 
   const handleLogout = () => {
     dispatch(logout());
     toast("✅ Logged Out");
     setMenuOpen(false);
     setMegaMenuOpen(false);
+    setProfileMenuOpen(false);
   };
+
+  // Close profile menu on click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setProfileMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const navLinks = [
     { href: "/", label: "Home" },
@@ -58,8 +75,8 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className={`${user?.role == 'admin' ? 'bg-teal-50' : 'bg-white'} shadow-md sticky top-0 z-90 w-full`}>
-      <div className=" mx-auto px-4 sm:px-6 lg:px-[8vw]">
+    <nav className={`${user?.role === "admin" ? "bg-teal-50" : "bg-white"} shadow-md sticky top-0 z-90 w-full`}>
+      <div className="mx-auto px-4 sm:px-6 lg:px-[8vw]">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
@@ -76,14 +93,11 @@ const Navbar = () => {
                 d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
               />
             </svg>
-            {
-              (user?.role == 'admin' ? 
-                <span className="font-bold text-xl text-teal-600">FineMed \ Admin</span>
-
-                :
-                <span className="font-bold text-xl text-teal-600">FineMed</span>
-              )
-            }
+            {user?.role === "admin" ? (
+              <span className="font-bold text-xl text-teal-600">FineMed \ Admin</span>
+            ) : (
+              <span className="font-bold text-xl text-teal-600">FineMed</span>
+            )}
           </Link>
 
           {/* Desktop Menu */}
@@ -107,13 +121,13 @@ const Navbar = () => {
                     {link.label}
                   </Link>
                   {megaMenuOpen && (
-                    <div className="absolute left-0 mt-2 w-[300px] bg-teal-600  shadow-lg rounded-md z-50 p-6">
+                    <div className="absolute left-0 mt-2 w-[300px] bg-teal-600 shadow-lg rounded-md z-50 p-6">
                       {shopCategories.map((category) => (
                         <div key={category.title} className="">
                           <h3 className="font-semibold text-white mb-2">
                             {category.title}
                           </h3>
-                          <ul className="space-y-1 ">
+                          <ul className="space-y-1">
                             {category.items.map((item) => (
                               <li key={item.href} className="">
                                 <Link
@@ -151,14 +165,36 @@ const Navbar = () => {
               )
             )}
 
-            {/* Auth Button */}
+            {/* Auth Section */}
             {user ? (
-              <button
-                onClick={handleLogout}
-                className="ml-4 px-4 py-2 font-bold bg-red-700 text-white rounded-full hover:bg-red-900 transition text-sm"
-              >
-                Logout
-              </button>
+              <div className="relative ml-4" ref={profileRef}>
+                <button
+                  onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                  className="flex items-center justify-center h-8 w-8 rounded-full bg-teal-600 text-white hover:bg-teal-700 transition"
+                  aria-label="Open profile menu"
+                >
+                  <FiUser size={20} />
+                </button>
+                {profileMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-teal-600 text-white rounded-md shadow-lg z-50 p-2">
+                    <Link
+                      href={user.role === "admin" ? "/admin" : "/profile"}
+                      className="block px-4 py-2 text-sm hover:bg-teal-700 rounded-md"
+                      onClick={() => setProfileMenuOpen(false)}
+                      aria-label="Go to profile"
+                    >
+                      Profile
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-sm hover:bg-teal-700 rounded-md"
+                      aria-label="Log out"
+                    >
+                      Log Out
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <Link
                 href="/login"
@@ -271,13 +307,40 @@ const Navbar = () => {
               )
             )}
 
+            {/* Mobile Auth Section */}
             {user ? (
-              <button
-                onClick={handleLogout}
-                className="font-bold block px-3 py-2 ml-2 mt-2 bg-red-900 text-white rounded-full text-base text-center hover:bg-red-900"
-              >
-                Logout
-              </button>
+              <div className="relative ml-2 mt-2">
+                <button
+                  onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                  className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-teal-100 hover:text-teal-800"
+                  aria-label="Open profile menu"
+                >
+                  <FiUser className="mr-2" size={20} />
+                  Profile
+                </button>
+                {profileMenuOpen && (
+                  <div className="pl-4 space-y-1">
+                    <Link
+                      href={user.role === "admin" ? "/admin" : "/profile"}
+                      className="block px-3 py-2 text-base text-gray-700 hover:bg-teal-100 hover:text-teal-800"
+                      onClick={() => {
+                        setMenuOpen(false);
+                        setProfileMenuOpen(false);
+                      }}
+                      aria-label="Go to profile"
+                    >
+                      Profile
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-3 py-2 text-base text-gray-700 hover:bg-teal-100 hover:text-teal-800"
+                      aria-label="Log out"
+                    >
+                      Log Out
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <Link
                 href="/login"

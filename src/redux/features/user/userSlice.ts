@@ -8,6 +8,7 @@ export interface IUser {
   email: string;
   address: string;
   phone: string;
+  role?:string
 }
 
 // Define the state type

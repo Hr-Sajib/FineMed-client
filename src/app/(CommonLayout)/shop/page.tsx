@@ -60,6 +60,9 @@ const AllMedicinesPage = () => {
   const [filterPrescription, setFilterPrescription] = useState("");
   const [sortPrice, setSortPrice] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const itemsPerPage = 9;
 
   const { data, isLoading, error } = useGetAllMedicinesQuery({
     search: search || undefined,
@@ -83,6 +86,11 @@ const AllMedicinesPage = () => {
       dispatch(setMedicines(medicinesArray));
     }
   }, [data, dispatch]);
+
+  // Reset currentPage when filters or sorting change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterCategory, filterForm, filterPrescription, sortPrice]);
 
   const filteredMedicines = useMemo(() => {
     return medicines.filter((medicine) => {
@@ -112,13 +120,33 @@ const AllMedicinesPage = () => {
     return filteredMedicines;
   }, [filteredMedicines, sortPrice]);
 
+  // Pagination logic
+  const totalPages = Math.ceil(sortedMedicines.length / itemsPerPage);
+  console.log("totalPages: ",totalPages)
+  const paginatedMedicines = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    return sortedMedicines.slice(start, end);
+  }, [sortedMedicines, currentPage]);
+
+  // Generate page numbers (show up to 5 pages)
+  const pageNumbers = useMemo(() => {
+    const maxPagesToShow = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+    if (endPage - startPage < maxPagesToShow - 1) {
+      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+    return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
+  }, [currentPage, totalPages]);
+
   if (isLoading) {
     return (
       <div className="min-h-[70vh] py-12 px-6 lg:px-8 max-w-7xl mx-auto mt-6">
         <h2 className="text-3xl font-semibold text-gray-800 text-center mb-8">
           All Medicines
         </h2>
-        <div className="grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-6 sm:gap-8 lg:gap-10">
+        <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-2 sm:gap-8 lg:gap-3">
           {[...Array(8)].map((_, index) => (
             <MedicineCardSkeleton key={index} />
           ))}
@@ -223,7 +251,7 @@ const AllMedicinesPage = () => {
               id="prescription"
               value={filterPrescription}
               onChange={(e) => setFilterPrescription(e.target.value)}
-              className="w-full px-5 py-3 border border-teal-200 rounded-full bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-400"
+              className="w-full px-5 py-3 border border-teal-200 rounded-full bg-teal-50 focus:outline-none focus:ring-2 focus:ring-2 focus:ring-teal-400"
               aria-label="Filter by prescription requirement"
             >
               <option value="">Prescription Required</option>
@@ -253,7 +281,7 @@ const AllMedicinesPage = () => {
         {/* Medicines Grid */}
         <div className="flex-1 px-4 ml-[20vw]">
           <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-2 sm:gap-8 lg:gap-3 mb-12">
-            {sortedMedicines.map((medicine) => {
+            {paginatedMedicines.map((medicine) => {
               const isInCart = cartItems.some((item) => item._id === medicine._id);
               const isOutOfStock = medicine.quantity === 0;
 
@@ -338,6 +366,49 @@ const AllMedicinesPage = () => {
               );
             })}
           </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex flex-wrap justify-center gap-2 mt-6">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className={`px-4 py-2 rounded-full text-white ${
+                  currentPage === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-teal-600 hover:bg-teal-700"
+                } transition-colors`}
+                aria-label="Go to previous page"
+              >
+                Previous
+              </button>
+
+              {pageNumbers.map((page) => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`px-4 py-2 rounded-full ${
+                    currentPage === page
+                      ? "bg-teal-600 text-white"
+                      : "bg-teal-50 text-teal-700 hover:bg-teal-200"
+                  } transition-colors`}
+                  aria-label={`Go to page ${page}`}
+                  aria-current={currentPage === page ? "page" : undefined}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className={`px-4 py-2 rounded-full text-white ${
+                  currentPage === totalPages ? "bg-gray-400 cursor-not-allowed" : "bg-teal-600 hover:bg-teal-700"
+                } transition-colors`}
+                aria-label="Go to next page"
+              >
+                Next
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
