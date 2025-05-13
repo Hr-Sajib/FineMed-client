@@ -40,19 +40,6 @@ const AdminDefaultPage = () => {
   const { data: ordersData, isLoading: ordersLoading, error: ordersError } = useGetAllOrdersQuery();
   const { data: medicinesData, isLoading: medicinesLoading, error: medicinesError } = useGetAllMedicinesQuery({});
 
-  // Debugging Step 2: Inspect API responses
-  // - Open DevTools > Console to check usersData, ordersData, medicinesData
-  // - Ensure each is an object with { data: [...] } or similar
-  // - If undefined, check API endpoints (/api/users, /api/orders, /api/medicines)
-  // - Use DevTools > Network to verify API calls and responses
-  console.log("Users data:", usersData);
-  console.log("Orders data:", ordersData);
-  console.log("Medicines data:", medicinesData);
-
-  // Debugging Step 3: Check for API errors
-  // - If usersError, ordersError, or medicinesError exists, log them
-  // - Check DevTools > Console for error details
-  // - Common issues: API down, incorrect endpoint, auth token missing
   if (usersError || ordersError || medicinesError) {
     console.error("API errors:", { usersError, ordersError, medicinesError });
   }
@@ -122,13 +109,6 @@ const AdminDefaultPage = () => {
     },
   };
 
-  // Debugging Step 4: Verify calculated stats
-  // - Check DevTools > Console for userStats, orderStats, medicineStats
-  // - Ensure totals and breakdowns are correct
-  // - If stats are 0, verify Redux store data is not empty
-  console.log("User stats:", userStats);
-  console.log("Order stats:", orderStats);
-  console.log("Medicine stats:", medicineStats);
 
   // Bar chart data
   const barData = {
@@ -192,14 +172,6 @@ const AdminDefaultPage = () => {
     ],
   };
 
-  // Debugging Step 5: Inspect chart data
-  // - Check DevTools > Console for barData, userPieData, orderPieData, medicinePieData
-  // - Ensure data arrays match labels and stats
-  // - If charts are empty, verify stats are non-zero and data is correctly structured
-  console.log("Bar chart data:", barData);
-  console.log("User pie chart data:", userPieData);
-  console.log("Order pie chart data:", orderPieData);
-  console.log("Medicine pie chart data:", medicinePieData);
 
   const chartOptions = {
     responsive: true,
@@ -225,10 +197,7 @@ const AdminDefaultPage = () => {
     },
   };
 
-  // Debugging Step 6: Monitor loading state
-  // - If skeleton cards are shown, check usersLoading, ordersLoading, medicinesLoading
-  // - Ensure all are false when APIs complete
-  // - If stuck, check Network tab for pending requests
+
   if (usersLoading || ordersLoading || medicinesLoading) {
     console.log("Loading states:", { usersLoading, ordersLoading, medicinesLoading });
     return (
@@ -246,10 +215,6 @@ const AdminDefaultPage = () => {
     );
   }
 
-  // Debugging Step 7: Check error state
-  // - If error message is shown, verify usersError, ordersError, medicinesError
-  // - Check Console for logged errors
-  // - Fix: Ensure API endpoints are correct and server is running
   if (usersError || ordersError || medicinesError) {
     console.error("Rendering error state:", { usersError, ordersError, medicinesError });
     return (
@@ -259,10 +224,6 @@ const AdminDefaultPage = () => {
     );
   }
 
-  // Debugging Step 8: Verify rendering
-  // - Open DevTools > Elements to inspect rendered charts
-  // - Use React Developer Tools to check component state
-  // - If charts don't render, ensure Chart.js is registered and data is valid
   return (
     <div className="min-h-[70vh] py-12 px-6 lg:px-8 max-w-7xl mx-auto">
       <h2 className="text-3xl font-semibold text-gray-800 text-center mb-8">Admin Dashboard</h2>

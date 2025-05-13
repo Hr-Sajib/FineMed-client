@@ -26,7 +26,7 @@ const AdminDashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="min-h-[100vh] flex flex-row">
         {/* Sidebar */}
         <nav
-          className={`bg-gray-800 text-white w-64 flex-shrink-0 shadow-md transition-transform duration-300 ${
+          className={`bg-green-50 text-black w-64 flex-shrink-0 shadow-md transition-transform duration-300 ${
             isMenuOpen ? "translate-x-0" : "-translate-x-full"
           } md:translate-x-0 fixed md:sticky top-0 h-screen z-50 flex flex-col`}
         >
@@ -52,15 +52,15 @@ const AdminDashboardLayout = ({ children }: { children: React.ReactNode }) => {
               </svg>
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto px-2 ">
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 href={item.path}
-                className={`block py-3 px-6 text-sm ${
+                className={`block py-3 px-6 rounded-lg ${
                   pathname === item.path
-                    ? "bg-gray-700 text-white border-l-2 border-white"
-                    : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                    ? "bg-teal-700 text-white border-l-2 border-white"
+                    : "text-black hover:bg-gray-100 "
                 } transition-colors`}
                 onClick={() => setIsMenuOpen(false)}
               >
