@@ -50,6 +50,7 @@ const ContactUs = () => {
 
   return (
     <div
+      data-aos="fade-down"
       className="w-full lg:-[70vh] relative bg-fixed bg-cover bg-center bg-no-repeat"
       style={{
         backgroundImage:

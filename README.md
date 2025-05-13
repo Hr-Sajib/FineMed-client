@@ -2,6 +2,9 @@
 
 A modern, responsive frontend for an online medicine shop built with Next.js, Redux Toolkit, RTK Query, Tailwind CSS, and Mongoose (for backend integration). This project focuses on providing a seamless shopping experience for customers looking to buy medicines online.
 
+✅ Live Site: <https://fine-med-client.vercel.app>
+
+
 ## 📋 Features & Route Structure
 ### 🏠 Home Page (/)
 - Navbar with logo and essential menu items.

@@ -4,7 +4,7 @@ import React from 'react'
 
 export default function AboutUs() {
     return (
-       <div className='min-h-[70vh]'>
+       <div  className='min-h-[70vh]'>
          <div className="grid grid-cols-1 lg:grid-cols-2 container mx-auto mt-10 gap-8 px-5">
           
           
@@ -12,6 +12,7 @@ export default function AboutUs() {
         
             <div className="relative w-full lg:w-3/4 h-[400px]">
               <Image
+              data-aos="zoom-in"
                 src="https://i.postimg.cc/fTRNVQCv/buyMed.jpg"
                 alt="About Image 1"
                 fill
@@ -23,6 +24,7 @@ export default function AboutUs() {
           
             <div className="w-[60vw] sm:w-[40vw] md:w-[30vw] lg:w-[25vw] h-[250px] absolute left-5 -bottom-20 hidden xl:block">
               <Image
+              data-aos="zoom-in"
                 src="https://images.unsplash.com/photo-1527613426441-4da17471b66d?q=80&w=1452&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                 alt="About Image 2"
                 fill
@@ -32,7 +34,7 @@ export default function AboutUs() {
             </div>
           </div>
     
-          <div className="flex flex-col justify-center text-center lg:text-left">
+          <div data-aos="fade-right" className="flex flex-col justify-center text-center lg:text-left">
             <h1 className="font-bold text-2xl underline mb-5 text-center">About FineMed</h1>
             <p className="max-w-3xl mx-auto lg:mx-0 px-6 font-semibold text-gray-500">
               At FineMed, we are dedicated to providing safe, reliable, and affordable 

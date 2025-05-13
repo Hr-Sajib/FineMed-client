@@ -4,6 +4,9 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import Link from "next/link";
 import Image from "next/image";
 import { clearCart, removeFromCart, updateQuantity } from "@/redux/features/cart/cartSlice";
+import Aos from "aos";
+import "aos/dist/aos.css";
+import { useEffect } from "react";
 
 const CartPage = () => {
   const { items } = useAppSelector((state) => state.cart);
@@ -17,6 +20,16 @@ const CartPage = () => {
       }
     }
   };
+
+
+      // Initialize AOS animations
+      useEffect(() => {
+        Aos.init({
+          duration: 600,
+          once: true,
+          offset: 20,
+        });
+      }, []);
 
   const handleRemove = (id: string) => {
     dispatch(removeFromCart(id));
@@ -35,7 +48,7 @@ const CartPage = () => {
   const prescriptionRequired = items.some((item) => item.prescriptionRequired);
 
   return (
-    <div className="bg-gray-100 min-h-[70vh]">
+    <div data-aos="fade-up" className="bg-gray-100 min-h-[70vh]">
       <div className="flex items-center justify-center">
         <div className="container mx-auto px-6 py-12">
           <h1 className="text-4xl font-semibold text-teal-800 mb-8 text-center">
@@ -55,7 +68,7 @@ const CartPage = () => {
           ) : (
             <div className="space-y-8">
               {prescriptionRequired && (
-                <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6">
+                <div data-aos="fade-right"  className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6">
                   <p className="font-semibold">
                     Some medicines in your cart require a prescription to proceed.
                   </p>
@@ -79,6 +92,7 @@ const CartPage = () => {
 
                 return (
                   <div
+                  data-aos="zoom-in" 
                     key={item._id}
                     className="bg-white shadow-lg rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6"
                   >
@@ -143,7 +157,7 @@ const CartPage = () => {
                 );
               })}
 
-              <div className="flex justify-between items-center border-t-2 border-gray-300 pt-8 mt-12">
+              <div className="flex lg:!flex-row flex-col justify-between items-center border-t-2 border-gray-300 pt-8 mt-12">
                 <h2 className="text-3xl font-bold text-gray-800">
                   Total: ${total.toFixed(2)}
                 </h2>

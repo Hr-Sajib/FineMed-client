@@ -1,5 +1,6 @@
 
 "use client";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { addToCart } from "@/redux/features/cart/cartSlice";
 import { useGetAllMedicinesQuery, useGetSingleMedicineQuery } from "@/redux/features/medicine/medicineApi";
@@ -101,7 +102,7 @@ const MedicineDetailsPage = () => {
   console.log("categoryFilter ", medicine?.category);
   console.log("suggestedMedicinesData ", suggestedMedicinesData);
 
-  const suggestedMedicines = suggestedMedicinesData?.data?.filter(
+  const suggestedMedicines = (suggestedMedicinesData?.data as unknown as any[]).filter(
     (med: IMedicine) => med._id !== medicine?._id && med.category === medicine?.category
   ) || [];
 
@@ -321,7 +322,6 @@ const MedicineDetailsPage = () => {
                   <h3 className="font-semibold text-lg text-gray-800 mb-2">
                     {suggestedMedicine.name}
                   </h3>
-
 
                   <div className="flex gap-0 mb-1">
                     <p className="bg-red-800 text-white px-2">Generic -</p>

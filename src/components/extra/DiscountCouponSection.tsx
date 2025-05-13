@@ -72,7 +72,7 @@ const DiscountCouponSection = () => {
   }, [isModalOpen]);
 
   return (
-    <div className="bg-white py-10 px-4">
+    <div data-aos="fade-down" className="bg-white py-10 px-4">
       <div
         className="max-w-7xl mx-auto bg-cover bg-center rounded-xl bg-teal-100 p-8 relative lg:mt-20 lg:mb-30"
         style={{

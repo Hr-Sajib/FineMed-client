@@ -48,7 +48,7 @@ const Review = () => {
   if (isLoading) {
     return (
       <div className="container bg-white mx-auto p-4 mb-20 mt-10">
-        <h2 className="text-2xl md:text-3xl font-bold mb-6 border-l-4 border-[#16a085] px-4">
+        <h2 data-aos="fade-right" className="text-2xl md:text-3xl font-bold mb-6 border-l-4 border-[#16a085] px-4">
           <span className="text-[#16a085]">What say</span> our client?
         </h2>
         <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-6">
@@ -78,6 +78,7 @@ const Review = () => {
         <span className="text-[#16a085]">What say</span> our client?
       </h2>
       <Swiper
+        data-aos="zoom-in"
         slidesPerView={3}
         spaceBetween={30}
         pagination={{

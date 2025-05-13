@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Banner from "@/components/banner/page";
 import Branding from "@/components/branding/page";
@@ -10,6 +10,8 @@ import Review from "@/components/review/Review";
 import ContactUs from "@/components/extra/ContactUs";
 import DiscountCouponSection from "@/components/extra/DiscountCouponSection";
 import BMICalculatorSection from "@/components/extra/BMICalculatorSection";
+import Aos from "aos";
+import "aos/dist/aos.css";
 
 
 const HomePageClient = () => {
@@ -23,9 +25,18 @@ const HomePageClient = () => {
     }
   };
 
+    // Initialize AOS animations
+    useEffect(() => {
+      Aos.init({
+        duration: 600,
+        once: true,
+        offset: 20,
+      });
+    }, []);
+
   return (
-    <div className="lg:py-8 mt-5">
-      <div className="lg:!w-[80vw] w-[90vw] mx-auto flex justify-center items-center gap-2 mb-5 bg-white rounded-full">
+    <div className="mt-5 w-full">
+      <div data-aos="fade-down" className="w-[80vw] lg:!mt-14 mt-8 mx-auto flex justify-center items-center gap-2 mb-5 bg-white rounded-full">
         <form onSubmit={handleSearch} className="flex w-full">
           <input
             type="text"

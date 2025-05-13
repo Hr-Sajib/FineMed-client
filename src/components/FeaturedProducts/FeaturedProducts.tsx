@@ -5,9 +5,11 @@ import { addToCart } from "@/redux/features/cart/cartSlice";
 import { useGetMedicineQuery } from "@/redux/features/medicine/featureMedicineApi";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { IMedicine } from "@/types";
+import Aos from "aos";
+import "aos/dist/aos.css";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 // Skeleton component for a single medicine card
@@ -48,6 +50,7 @@ export default function FeaturedProducts() {
   const dispatch = useAppDispatch();
   const cartItems = useAppSelector((state) => state.cart.items);
 
+  // console.log("data: ",medicineData)
   const handleAddToCart = (medicine: IMedicine) => {
     if (!medicine) {
       toast.error("Failed to add to cart: Medicine data is missing");
@@ -76,10 +79,19 @@ export default function FeaturedProducts() {
     toast.success(`${medicine.name} added to cart!`);
   };
 
+      // Initialize AOS animations
+      useEffect(() => {
+        Aos.init({
+          duration: 600,
+          once: true,
+          offset: 20,
+        });
+      }, []);
+
   if (isLoading) {
     return (
       <div className="bg-white container mx-auto lg:my-48 my-30">
-        <h3 className="text-gray-800 text-3xl font-bold px-4 border-l-4 border-teal-600 mb-6">
+        <h3 data-aos="fade-right" className="text-gray-800 text-3xl font-bold px-4 border-l-4 border-teal-600 mb-6">
           <span className="text-teal-600">Featured</span> Medicine
         </h3>
         {/* Skeleton Grid */}
@@ -95,21 +107,22 @@ export default function FeaturedProducts() {
   if (error) return <div>Error loading medicines</div>;
 
   return (
-    <div className="bg-white container mx-auto lg:my-48 my-30">
+    <div className="bg-white container mx-auto lg:my-48 my-30 px-5 lg:!px-0">
       <h3 className="text-gray-800 text-3xl font-bold px-4 border-l-4 border-teal-600 mb-6">
         <span className="text-teal-600">Featured</span> Medicine
       </h3>
 
       {/* 🧾 Medicines Grid */}
-      <div className="grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-2">
+      <div className="grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-4">
         {medicineData.slice(0,12).map((medicine: IMedicine) => {
           const isInCart = cartItems.some((item) => item._id === medicine._id);
           const isOutOfStock = medicine.quantity === 0;
 
           return (
             <div
+              data-aos="zoom-in"
               key={medicine._id}
-              className="bg-[#e6f4f1] shadow-md rounded-md overflow-hidden p-4"
+              className="bg-[#e6f4f1] shadow-md rounded-xl overflow-hidden p-4"
             >
               <div className="relative w-full h-[200px] mb-4 rounded-md overflow-hidden">
                 <Image
@@ -148,8 +161,8 @@ export default function FeaturedProducts() {
               <div className="flex justify-between mt-4">
                 <Link
                   href={`/medicine/${medicine._id}`}
-                  className="bg-blue-200 text-black hover:text-white py-1 px-3 rounded-full hover:bg-red-200"
-                >
+                  className="bg-blue-200 text-black py-1 px-3 rounded-full hover:bg-blue-800 hover:text-white"
+                  >
                   Details
                 </Link>
                 <button

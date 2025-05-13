@@ -12,7 +12,8 @@ import { useCreateOrderMutation } from "@/redux/features/order/orderApi";
 import { postImage } from "@/utils/postImage";
 import { ProtectedRoute } from "@/components/protectedRoutes/ProtectedRouteProps";
 import { ChevronDown } from "lucide-react";
-
+import Aos from "aos";
+import "aos/dist/aos.css";
 // Define custom error type to handle RTK Query error shapes
 interface OrderError {
   data?: {
@@ -36,6 +37,15 @@ export interface IOrderData {
 }
 
 const CheckoutPage = () => {
+    // Initialize AOS animations
+    useEffect(() => {
+      Aos.init({
+        duration: 600,
+        once: true,
+        offset: 20,
+      });
+    }, []);
+
   const { items } = useAppSelector((state) => state.cart);
   const authUser = useAppSelector(selectCurrentUser);
   const dispatch = useAppDispatch();
@@ -254,7 +264,7 @@ const CheckoutPage = () => {
 
   return (
     <ProtectedRoute>
-      <div className="bg-gray-100 min-h-[70vh] py-10">
+      <div data-aos="fade-down" className="bg-gray-100 min-h-[70vh] py-10">
         <div className="max-w-7xl mx-auto px-4">
           <div className="bg-white shadow-xl rounded-xl p-8">
             <h1 className="text-3xl font-bold text-center text-teal-700 mb-8">

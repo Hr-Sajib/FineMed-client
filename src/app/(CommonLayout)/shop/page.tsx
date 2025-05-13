@@ -1,4 +1,3 @@
-
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -10,8 +9,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useGetAllMedicinesQuery } from "@/redux/features/medicine/medicineApi";
 import { selectMedicines, setMedicines } from "@/redux/features/medicine/medicineSlice";
 import { addToCart, selectCart } from "@/redux/features/cart/cartSlice";
-import { FiMenu, FiX } from "react-icons/fi";
+import { FiX } from "react-icons/fi";
 import { IMedicine } from "@/types";
+import { toast } from "sonner";
+import { FaFilter } from "react-icons/fa";
+import Aos from "aos";
+import "aos/dist/aos.css";
 
 // Define the expected response type for the query
 interface MedicinesResponse {
@@ -20,19 +23,19 @@ interface MedicinesResponse {
 
 const MedicineCardSkeleton = () => {
   return (
-    <div className="border border-gray-200 shadow-md rounded-xl overflow-hidden p-6 animate-pulse">
+    <div className="bg-[#e6f4f1] shadow-md rounded-xl overflow-hidden p-4 animate-pulse">
       <div className="relative w-full h-[200px] mb-4 rounded-md overflow-hidden bg-gray-200"></div>
-      <div className="h-6 bg-gray-200 rounded w-3/4 mb-3"></div>
-      <div className="flex gap-0">
+      <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+      <div className="flex gap-0 mb-1">
         <div className="h-5 bg-gray-200 rounded w-16"></div>
         <div className="h-5 bg-gray-200 rounded w-24"></div>
       </div>
-      <div className="flex gap-0 mt-2">
-        <div className="h-5 bg-gray-200 rounded w-20"></div>
+      <div className="flex gap-0 mb-1">
         <div className="h-5 bg-gray-200 rounded w-16"></div>
+        <div className="h-5 bg-gray-200 rounded w-24"></div>
       </div>
-      <div className="h-6 bg-gray-200 rounded w-1/4 mt-3"></div>
-      <div className="flex gap-2 mt-2">
+      <div className="h-6 bg-gray-200 rounded w-1/4 mt-2 mb-2"></div>
+      <div className="flex gap-2 mb-2">
         <div className="h-5 bg-gray-200 rounded w-20"></div>
         <div className="h-5 bg-gray-200 rounded w-6"></div>
       </div>
@@ -50,6 +53,15 @@ const AllMedicinesPage = () => {
   const searchParams = useSearchParams();
   const medicines = useSelector(selectMedicines).medicines;
   const cartItems = useSelector(selectCart);
+
+  // Initialize AOS animations
+  useEffect(() => {
+    Aos.init({
+      duration: 600,
+      once: true,
+      offset: 20,
+    });
+  }, []);
 
   // Initialize states from URL query parameters
   const initialSearch = searchParams.get("search") || "";
@@ -87,6 +99,33 @@ const AllMedicinesPage = () => {
     }
   }, [data, dispatch]);
 
+  const handleAddToCart = (medicine: IMedicine) => {
+    if (!medicine) {
+      toast.error("Failed to add to cart: Medicine data is missing");
+      return;
+    }
+
+    dispatch(
+      addToCart({
+        _id: medicine._id!,
+        name: medicine.name,
+        price: medicine.price,
+        quantity: 1,
+        image: medicine.image,
+        prescriptionRequired: medicine.prescriptionRequired,
+        generic: medicine.generic,
+        brand: medicine.brand,
+        form: medicine.form,
+        category: medicine.category,
+        description: medicine.description,
+        simptoms: medicine.simptoms,
+        manufacturer: medicine.manufacturer,
+        expiryDate: medicine.expiryDate,
+      })
+    );
+    toast.success(`${medicine.name} added to cart!`);
+  };
+
   // Reset currentPage when filters or sorting change
   useEffect(() => {
     setCurrentPage(1);
@@ -122,7 +161,6 @@ const AllMedicinesPage = () => {
 
   // Pagination logic
   const totalPages = Math.ceil(sortedMedicines.length / itemsPerPage);
-  console.log("totalPages: ",totalPages)
   const paginatedMedicines = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     const end = start + itemsPerPage;
@@ -142,14 +180,27 @@ const AllMedicinesPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-[70vh] py-12 px-6 lg:px-8 max-w-7xl mx-auto mt-6">
-        <h2 className="text-3xl font-semibold text-gray-800 text-center mb-8">
-          All Medicines
-        </h2>
-        <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-2 sm:gap-8 lg:gap-3">
-          {[...Array(8)].map((_, index) => (
-            <MedicineCardSkeleton key={index} />
-          ))}
+      <div className="min-h-[70vh] py-12 px-6 max-w-7xl mx-auto mt-9 flex flex-col lg:flex-row gap-6">
+        {/* Skeleton Sidebar for Large Screens */}
+        <div className="hidden lg:block lg:w-80 lg:!h-[58vh] sticky top-50 bg-white p-6 shadow-lg rounded-lg">
+          <div className="h-6 w-1/2 bg-gray-200 rounded animate-pulse mb-6"></div>
+          <div className="space-y-4">
+            {[...Array(5)].map((_, index) => (
+              <div key={index} className="h-10 w-full bg-gray-200 rounded animate-pulse"></div>
+            ))}
+          </div>
+        </div>
+
+        {/* Skeleton Main Content */}
+        <div className="w-full lg:w-3/4">
+          <h2 className="text-3xl font-semibold text-teal-800 text-center mb-8">
+            All Medicines
+          </h2>
+          <div className="grid lg:grid-cols-4 grid-cols-1 gap-4">
+            {[...Array(8)].map((_, index) => (
+              <MedicineCardSkeleton key={index} />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -157,37 +208,17 @@ const AllMedicinesPage = () => {
 
   if (error)
     return (
-      <div className="min-h-[70vh] text-center py-12 px-6 text-red-600 max-w-7xl mx-auto mt-6">
+      <div className="min-h-[70vh] text-center py-12 px-6 text-red-600 max-w-7xl mx-auto mt-9">
         Error loading medicines: {JSON.stringify(error)}
       </div>
     );
 
   return (
-    <div className="min-h-[70vh] py-12 px-6 lg:px-8 max-w-7xl mx-auto mt-6">
-      <h2 className="text-3xl font-semibold text-gray-800 text-center mb-8">
-        All Medicines
-      </h2>
-
-      <div className="flex flex-col md:flex-row gap-6 lg:gap-8">
-        {/* Sidebar Toggle Button (Mobile) */}
-        <button
-          className="md:hidden fixed top-4 left-4 bg-teal-600 text-white p-3 rounded-full flex items-center justify-center z-50"
-          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          aria-expanded={isSidebarOpen}
-          aria-controls="sidebar"
-        >
-          {isSidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-        </button>
-
-        {/* Sidebar */}
-        <div
-          id="sidebar"
-          className={`${
-            isSidebarOpen ? "block" : "hidden"
-          } md:block w-full md:w-64 lg:w-72 max-w-xs bg-white fixed p-4 md:p-6 rounded-xl shadow-md space-y-4 md:space-y-6 mt-12 md:mt-0`}
-        >
-          <h3 className="text-lg font-semibold text-teal-700 mb-4">Filters</h3>
-
+    <div className="min-h-[70vh] px-6 mx-auto mt-9 flex flex-col lg:flex-row gap-6">
+      {/* Sticky Left Sidebar for Large Screens */}
+      <div className="hidden mb-3 lg:block lg:w-80 lg:!h-[58vh] sticky top-50 bg-white p-6 shadow-lg rounded-lg">
+        <h3 className="text-lg font-semibold text-teal-700 mb-4">Filters</h3>
+        <div className="space-y-4">
           <div>
             <label htmlFor="search" className="block text-teal-700 font-semibold mb-2">
               Search
@@ -277,139 +308,250 @@ const AllMedicinesPage = () => {
             </select>
           </div>
         </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="w-full mb-10">
+        <h2 data-aos="fade-up" className="text-3xl font-semibold text-teal-800 text-center mb-8">
+          All Medicines
+        </h2>
+
+        {/* Mobile Filter Button */}
+        <button
+          onClick={() => setIsSidebarOpen(true)}
+          className="md:hidden fixed top-24 right-0 bg-teal-600 text-white p-3 rounded-l-xl flex items-center justify-center z-50"
+          title="Filter"
+        >
+          <FaFilter size={24} />
+        </button>
+
+        {/* Mobile Sidebar Modal */}
+        {isSidebarOpen && (
+          <div data-aos="fade-left" className="fixed inset-0 z-50 md:hidden">
+            <div className="fixed top-20 right-0 w-80 h-full bg-white p-6 shadow-lg transform transition-transform duration-300 ease-in-out">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-teal-700">Filters</h3>
+                <button
+                  onClick={() => setIsSidebarOpen(false)}
+                  className="text-gray-600 hover:text-gray-800"
+                  title="Close"
+                >
+                  <FiX size={24} />
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="searchMobile" className="block text-teal-700 font-semibold mb-2">
+                    Search
+                  </label>
+                  <input
+                    id="searchMobile"
+                    type="text"
+                    placeholder="Search medicines..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full px-5 py-3 border border-teal-200 rounded-full bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                    aria-label="Search medicines"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="categoryMobile" className="block text-teal-700 font-semibold mb-2">
+                    Category
+                  </label>
+                  <select
+                    id="categoryMobile"
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                    className="w-full px-5 py-3 border border-teal-200 rounded-full bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                    aria-label="Filter by category"
+                  >
+                    <option value="">All Categories</option>
+                    <option value="Antibiotic">Antibiotic</option>
+                    <option value="Painkiller">Painkiller</option>
+                    <option value="Antacid">Antacid</option>
+                    <option value="Antiseptic">Antiseptic</option>
+                    <option value="Antiviral">Antiviral</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="formMobile" className="block text-teal-700 font-semibold mb-2">
+                    Form
+                  </label>
+                  <select
+                    id="formMobile"
+                    value={filterForm}
+                    onChange={(e) => setFilterForm(e.target.value)}
+                    className="w-full px-5 py-3 border border-teal-200 rounded-full bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                    aria-label="Filter by form"
+                  >
+                    <option value="">All Forms</option>
+                    <option value="Capsule">Capsule</option>
+                    <option value="Tablet">Tablet</option>
+                    <option value="Liquid">Liquid</option>
+                    <option value="Gel">Gel</option>
+                    <option value="Cream">Cream</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="prescriptionMobile" className="block text-teal-700 font-semibold mb-2">
+                    Prescription
+                  </label>
+                  <select
+                    id="prescriptionMobile"
+                    value={filterPrescription}
+                    onChange={(e) => setFilterPrescription(e.target.value)}
+                    className="w-full px-5 py-3 border border-teal-200 rounded-full bg-teal-50 focus:outline-none focus:ring-2 focus:ring-2 focus:ring-teal-400"
+                    aria-label="Filter by prescription requirement"
+                  >
+                    <option value="">Prescription Required</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="sortPriceMobile" className="block text-teal-700 font-semibold mb-2">
+                    Sort by Price
+                  </label>
+                  <select
+                    id="sortPriceMobile"
+                    value={sortPrice}
+                    onChange={(e) => setSortPrice(e.target.value)}
+                    className="w-full px-5 py-3 border border-teal-200 rounded-full bg-teal-50 focus:outline-none focus:ring-2 focus:ring-teal-400"
+                    aria-label="Sort by price"
+                  >
+                    <option value="">Sort by Price</option>
+                    <option value="asc">Low to High</option>
+                    <option value="desc">High to Low</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Medicines Grid */}
-        <div className="flex-1 px-4 ml-[20vw]">
-          <div className="grid lg:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-2 sm:gap-8 lg:gap-3 mb-12">
-            {paginatedMedicines.map((medicine) => {
-              const isInCart = cartItems.some((item) => item._id === medicine._id);
-              const isOutOfStock = medicine.quantity === 0;
+        <div className="grid lg:grid-cols-4 grid-cols-1 gap-4 mb-12">
+          {paginatedMedicines.map((medicine) => {
+            const isInCart = cartItems.some((item) => item._id === medicine._id);
+            const isOutOfStock = medicine.quantity === 0;
 
-              return (
-                <div
-                  key={medicine._id}
-                  className="bg-[#e6f4f1] shadow-md rounded-xl overflow-hidden p-6"
-                >
-                  <div className="relative w-full h-[200px] mb-4 rounded-md overflow-hidden">
-                    <Image
-                      src={medicine.image}
-                      alt={medicine.name}
-                      fill
-                      style={{ objectFit: "cover" }}
-                      className="rounded-md"
-                    />
-                  </div>
-
-                  <h3 className="font-semibold text-lg text-gray-800 mb-3">
-                    {medicine.name}
-                  </h3>
-
-                  <div className="flex gap-0 mb-2">
-                    <p className="bg-red-800 text-white px-2 py-1">Generic -</p>
-                    <p className="bg-red-100 px-2 py-1">{medicine.generic}</p>
-                  </div>
-
-                  <div className="flex gap-0 mb-2">
-                    <p className="bg-blue-100 px-2 py-1">Category</p>
-                    <p className="bg-blue-100 px-2 py-1">{medicine.category}</p>
-                  </div>
-
-                  <p className="text-xl font-bold text-blue-600 mt-3 mb-2">
-                    ${medicine.price}
-                  </p>
-                  <div className="flex gap-2 mb-3">
-                    <p>Prescription</p>
-                    <p className="text-2xl relative bottom-1 text-red-600">
-                      {medicine.prescriptionRequired ? "✔" : "✘"}
-                    </p>
-                  </div>
-
-                  <div className="flex justify-between mt-4 gap-3">
-                    <Link
-                      href={`/medicine/${medicine._id}`}
-                      className="bg-red-200 text-black py-2 px-4 rounded-full hover:bg-red-300 transition-colors"
-                    >
-                      Details
-                    </Link>
-                    <button
-                      disabled={isInCart || isOutOfStock}
-                      onClick={() =>
-                        dispatch(
-                          addToCart({
-                            _id: medicine._id!,
-                            name: medicine.name,
-                            price: medicine.price,
-                            quantity: 1,
-                            image: medicine.image,
-                            prescriptionRequired: medicine.prescriptionRequired,
-                            generic: medicine.generic,
-                            brand: medicine.brand,
-                            form: medicine.form,
-                            category: medicine.category,
-                            description: medicine.description,
-                            simptoms: medicine.simptoms,
-                            manufacturer: medicine.manufacturer,
-                            expiryDate: medicine.expiryDate,
-                          })
-                        )
-                      }
-                      className={`py-2 px-4 rounded-full text-white ${
-                        isInCart || isOutOfStock
-                          ? "bg-gray-400 cursor-not-allowed"
-                          : "bg-green-600 hover:bg-green-700"
-                      } transition-colors`}
-                    >
-                      {isInCart ? "Added" : isOutOfStock ? "Out of Stock" : "Add to Cart"}
-                    </button>
-                  </div>
+            return (
+              <div
+                data-aos="zoom-in"
+                key={medicine._id}
+                className="bg-[#e6f4f1] shadow-md rounded-xl overflow-hidden p-4"
+              >
+                <div className="relative w-full h-[200px] mb-4 rounded-md overflow-hidden">
+                  <Image
+                    src={medicine.image}
+                    alt={medicine.name}
+                    fill
+                    style={{ objectFit: "cover" }}
+                    className="rounded-md"
+                  />
                 </div>
-              );
-            })}
-          </div>
 
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <div className="flex flex-wrap justify-center gap-2 mt-6">
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className={`px-4 py-2 rounded-full text-white ${
-                  currentPage === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-teal-600 hover:bg-teal-700"
-                } transition-colors`}
-                aria-label="Go to previous page"
-              >
-                Previous
-              </button>
+                <h3 className="font-semibold text-lg text-gray-800 mb-2">
+                  {medicine.name}
+                </h3>
 
-              {pageNumbers.map((page) => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`px-4 py-2 rounded-full ${
-                    currentPage === page
-                      ? "bg-teal-600 text-white"
-                      : "bg-teal-50 text-teal-700 hover:bg-teal-200"
-                  } transition-colors`}
-                  aria-label={`Go to page ${page}`}
-                  aria-current={currentPage === page ? "page" : undefined}
-                >
-                  {page}
-                </button>
-              ))}
+                <div className="flex gap-0 mb-1">
+                  <p className="bg-red-800 text-white px-2">Generic -</p>
+                  <p className="bg-red-100 px-2">{medicine.generic}</p>
+                </div>
 
-              <button
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className={`px-4 py-2 rounded-full text-white ${
-                  currentPage === totalPages ? "bg-gray-400 cursor-not-allowed" : "bg-teal-600 hover:bg-teal-700"
-                } transition-colors`}
-                aria-label="Go to next page"
-              >
-                Next
-              </button>
-            </div>
-          )}
+                <div className="flex gap-0">
+                  <p className="bg-blue-100 px-2">Category</p>
+                  <p className="bg-blue-100 px-2">{medicine.category}</p>
+                </div>
+
+                <p className="text-xl font-bold text-blue-600 mt-2">
+                  ${medicine.price}
+                </p>
+                <div className="flex gap-2">
+                  <p>Prescription</p>
+                  <p className="text-2xl relative bottom-1 text-red-600">
+                    {medicine.prescriptionRequired ? "✔" : "✘"}
+                  </p>
+                </div>
+
+                <div className="flex justify-between mt-4">
+                  <Link
+                    href={`/medicine/${medicine._id}`}
+                    className="bg-blue-200 text-black py-1 px-3 rounded-full hover:bg-blue-800 hover:text-white"
+                  >
+                    Details
+                  </Link>
+                  <button
+                    disabled={isInCart || isOutOfStock}
+                    onClick={() => handleAddToCart(medicine)}
+                    className={`py-1 px-3 rounded-full text-white ${
+                      isInCart || isOutOfStock
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-green-600 hover:bg-green-700"
+                    }`}
+                  >
+                    {isInCart ? "Added" : isOutOfStock ? "Out of Stock" : "Add to Cart"}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
+        {totalPages > 1 && (
+          <div className="flex flex-wrap justify-center gap-2 mt-6">
+            <button
+              onClick={() => {
+                setCurrentPage((prev) => Math.max(prev - 1, 1));
+                window.scrollTo({ top: 0 });
+              }}
+              disabled={currentPage === 1}
+              className={`px-4 py-2 rounded-full text-white ${
+                currentPage === 1 ? "bg-gray-400 cursor-not-allowed" : "bg-teal-600 hover:bg-teal-700"
+              } transition-colors`}
+              aria-label="Go to previous page"
+            >
+              Previous
+            </button>
+
+            {pageNumbers.map((page) => (
+              <button
+                key={page}
+                onClick={() => {
+                  setCurrentPage(page);
+                  window.scrollTo({ top: 0 });
+                }}
+                className={`px-4 py-2 rounded-full ${
+                  currentPage === page
+                    ? "bg-teal-600 text-white"
+                    : "bg-teal-50 text-teal-700 hover:bg-teal-200"
+                } transition-colors`}
+                aria-label={`Go to page ${page}`}
+                aria-current={currentPage === page ? "page" : undefined}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button
+              onClick={() => {
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+                window.scrollTo({ top: 0 });
+              }}
+              disabled={currentPage === totalPages}
+              className={`px-4 py-2 rounded-full text-white ${
+                currentPage === totalPages ? "bg-gray-400 cursor-not-allowed" : "bg-teal-600 hover:bg-teal-700"
+              } transition-colors`}
+              aria-label="Go to next page"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

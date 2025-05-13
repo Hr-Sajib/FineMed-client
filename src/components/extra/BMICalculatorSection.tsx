@@ -1,7 +1,6 @@
 
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 import { FiX } from "react-icons/fi";
 import { toast } from "sonner";
@@ -81,7 +80,7 @@ const BMICalculatorSection = () => {
   };
 
   return (
-    <div className="bg-gray-100 py-10 px-4 flex justify-center gap-10">
+    <div data-aos="fade-down" className="bg-gray-100 py-10 px-4 flex justify-center gap-10">
     <p className="mt-10 text-5xl w-90">Its cruicial to regularly measure and monitor your BMI and take actions..</p>
       <div
         className="max-w-7xl bg-cover bg-center rounded-xl shadow-xl p-8 relative"
@@ -90,7 +89,7 @@ const BMICalculatorSection = () => {
             "url('https://images.unsplash.com/photo-1506126279646-28784a6f3c51?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80')", // Health-themed background
         }}
       >
-        <div className="bg-white bg-opacity-80 rounded-xl p-6 max-w-lg mx-auto">
+        <div data-aos="zoom-in" className="bg-white bg-opacity-80 rounded-xl p-6 max-w-lg mx-auto">
           <h2 className="text-3xl font-bold text-teal-700 mb-4 text-center">
             Calculate Your BMI!
           </h2>
