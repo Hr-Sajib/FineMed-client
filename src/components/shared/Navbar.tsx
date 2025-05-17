@@ -20,7 +20,7 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const profileRef = useRef<HTMLDivElement>(null);
 
-  console.log("user: ", user);
+  // console.log("user: ", user);
 
   const handleLogout = () => {
     dispatch(logout());

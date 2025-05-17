@@ -61,8 +61,8 @@ const AdminDefaultPage = () => {
 
   // Set medicines in store
   useEffect(() => {
-    if (medicinesData?.data?.medicines) {
-      dispatch(setMedicines(medicinesData.data.medicines));
+    if (medicinesData?.data) {
+      dispatch(setMedicines(medicinesData.data));
     }
   }, [medicinesData, dispatch]);
 

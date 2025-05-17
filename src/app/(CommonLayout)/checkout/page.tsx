@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
@@ -14,6 +13,7 @@ import { ProtectedRoute } from "@/components/protectedRoutes/ProtectedRouteProps
 import { ChevronDown } from "lucide-react";
 import Aos from "aos";
 import "aos/dist/aos.css";
+
 // Define custom error type to handle RTK Query error shapes
 interface OrderError {
   data?: {
@@ -55,7 +55,7 @@ const CheckoutPage = () => {
 
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
-  const [phone] = useState("");
+  const [phone, setPhone] = useState(""); // Fixed: Added setPhone
   const [paymentMethod, setPaymentMethod] = useState<"cashOnDelivery" | "sslcommerz">("cashOnDelivery");
   const [prescription, setPrescription] = useState<File | null>(null);
   const [prescriptionRequiredState, setPrescriptionRequiredState] = useState(false);
@@ -361,7 +361,7 @@ const CheckoutPage = () => {
                     placeholder="Phone Number"
                     className="w-full px-4 py-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-teal-400"
                     value={phone}
-                    onChange={(e) => setAddress(e.target.value)}
+                    onChange={(e) => setPhone(e.target.value)} // Fixed: Use setPhone
                   />
                   <div>
                     <label htmlFor="prescription-upload" className="block mb-2 font-medium">

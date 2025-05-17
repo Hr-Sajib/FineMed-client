@@ -11,15 +11,7 @@ export interface MedicineResponse {
 export interface MedicinesResponse {
   success: boolean;
   message: string;
-  data: {
-    medicines: IMedicine[];
-    meta: {
-      page: number;
-      limit: number;
-      total: number;
-      totalPage: number;
-    };
-  };
+  data: IMedicine[];
 }
 
 export interface DeleteResponse {

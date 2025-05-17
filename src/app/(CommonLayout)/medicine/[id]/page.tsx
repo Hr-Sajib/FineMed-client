@@ -1,4 +1,3 @@
-
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -51,7 +50,6 @@ const MedicineDetailsSkeleton = () => {
           <div className="bg-[#e6f4f1] flex items-center justify-center p-8">
             <div className="relative w-full h-96 bg-gray-200 rounded-2xl"></div>
           </div>
-
           {/* Right Side: Info Placeholder */}
           <div className="flex flex-col justify-between p-8">
             <div>
@@ -93,18 +91,29 @@ const MedicineDetailsPage = () => {
   const params = useParams();
   const id = params?.id as string;
 
-  const { data: singleMedicineData, isLoading: isSingleLoading, error: singleError } = useGetSingleMedicineQuery(id);
+
+  const singleMedicineResponse = useGetSingleMedicineQuery(id);
+  const { data: singleMedicineData, isLoading: isSingleLoading, error: singleError } = singleMedicineResponse;
   const medicine: IMedicine | undefined = singleMedicineData?.data;
 
-  // Fetch suggested medicines (no filter, client-side category filtering)
+  // Fetch suggested medicines
   const { data: suggestedMedicinesData, isLoading: isSuggestedLoading } = useGetAllMedicinesQuery({});
 
-  console.log("categoryFilter ", medicine?.category);
-  console.log("suggestedMedicinesData ", suggestedMedicinesData);
+  // Log for debugging
+  console.log("singleMedicineResponse", singleMedicineResponse);
+  console.log("singleMedicineData", singleMedicineData);
+  console.log("suggestedMedicinesData", suggestedMedicinesData);
+  console.log("singleError", singleError);
+  console.log("id", id);
 
-  const suggestedMedicines = (suggestedMedicinesData?.data as unknown as any[]).filter(
-    (med: IMedicine) => med._id !== medicine?._id && med.category === medicine?.category
-  ) || [];
+
+// Filter suggested medicines safely with typed suggestedMedicinesData
+
+  const suggestedMedicines = medicine && suggestedMedicinesData?.data
+    ? suggestedMedicinesData.data.filter(
+        (med: IMedicine) => med._id !== medicine._id && med.category === medicine.category
+      )
+    : [];
 
   const [quantity, setQuantity] = useState(1);
   const dispatch = useAppDispatch();
@@ -155,12 +164,8 @@ const MedicineDetailsPage = () => {
     return (
       <div className="flex justify-center items-center h-[70vh]">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-700">
-            Medicine Not Found
-          </h2>
-          <p className="text-gray-500 mt-2">
-            Sorry, the medicine you are looking for is unavailable.
-          </p>
+          <h2 className="text-2xl font-bold text-gray-700">Medicine Not Found</h2>
+          <p className="text-gray-500 mt-2">Sorry, the medicine you are looking for is unavailable.</p>
         </div>
       </div>
     );
@@ -170,10 +175,10 @@ const MedicineDetailsPage = () => {
     return (
       <div className="flex justify-center items-center h-[70vh]">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-500">
-            Something went wrong!
-          </h2>
-          <p className="text-gray-500 mt-2">Please try again later.</p>
+          <h2 className="text-2xl font-bold text-red-500">Something went wrong!</h2>
+          <p className="text-gray-500 mt-2">
+            {(singleError as any)?.data?.message || "Please try again later."}
+          </p>
         </div>
       </div>
     );
@@ -196,25 +201,15 @@ const MedicineDetailsPage = () => {
               />
             </div>
           </div>
-
           {/* Right Side: Info */}
           <div className="flex flex-col justify-between p-8 w-full">
             <div>
-              <h1 className="text-4xl font-extrabold text-[#1a365d] mb-2">
-                {medicine.name}
-              </h1>
+              <h1 className="text-4xl font-extrabold text-[#1a365d] mb-2">{medicine.name}</h1>
               <p className="text-lg text-[#319795] mb-4">
                 {medicine.brand} • {medicine.form}
               </p>
-
-              <p className="text-4xl font-bold text-[#38a169] mb-6">
-                ${medicine.price.toFixed(2)}
-              </p>
-
-              <p className="text-gray-700 mb-6 leading-relaxed">
-                {medicine.description}
-              </p>
-
+              <p className="text-4xl font-bold text-[#38a169] mb-6">${medicine.price.toFixed(2)}</p>
+              <p className="text-gray-700 mb-6 leading-relaxed">{medicine.description}</p>
               <div className="mb-6">
                 <h3 className="font-semibold text-gray-800 mb-1">Symptoms:</h3>
                 <div className="flex flex-wrap gap-2">
@@ -228,23 +223,18 @@ const MedicineDetailsPage = () => {
                   ))}
                 </div>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-600 text-sm mb-6">
                 <p>
-                  <strong className="text-gray-800">Manufacturer:</strong>{" "}
-                  {medicine.manufacturer}
+                  <strong className="text-gray-800">Manufacturer:</strong> {medicine.manufacturer}
                 </p>
                 <p>
-                  <strong className="text-gray-800">Expiry:</strong>{" "}
-                  {medicine.expiryDate}
+                  <strong className="text-gray-800">Expiry:</strong> {medicine.expiryDate}
                 </p>
                 <p>
-                  <strong className="text-gray-800">Category:</strong>{" "}
-                  {medicine.category}
+                  <strong className="text-gray-800">Category:</strong> {medicine.category}
                 </p>
                 <p>
-                  <strong className="text-gray-800">Stock:</strong>{" "}
-                  {medicine.quantity}
+                  <strong className="text-gray-800">Stock:</strong> {medicine.quantity}
                 </p>
                 <p>
                   <strong className="text-gray-800">Prescription:</strong>{" "}
@@ -252,7 +242,6 @@ const MedicineDetailsPage = () => {
                 </p>
               </div>
             </div>
-
             {/* Quantity Selector and Button */}
             <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
               <div className="flex items-center border border-gray-300 rounded-full overflow-hidden bg-[#edf2f7]">
@@ -275,7 +264,6 @@ const MedicineDetailsPage = () => {
                   +
                 </button>
               </div>
-
               <button
                 onClick={() => handleAddToCart(medicine)}
                 className="flex items-center gap-2 bg-gradient-to-r from-[#68d391] to-[#4fd1c5] hover:from-[#48bb78] hover:to-[#38b2ac] transition-all text-white py-3 px-8 rounded-full text-lg font-semibold shadow-md"
@@ -286,12 +274,9 @@ const MedicineDetailsPage = () => {
           </div>
         </div>
       </div>
-
       {/* Suggested Medicines */}
       <div className="container mx-auto px-6 py-12 lg:w-[80vw]">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-          You may also need
-        </h2>
+        <h2 className="text-2xl font-semibold text-gray-800 mb-6">You may also need</h2>
         {isSuggestedLoading ? (
           <div className="grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-6">
             {[...Array(4)].map((_, index) => (
@@ -303,11 +288,10 @@ const MedicineDetailsPage = () => {
             {suggestedMedicines.map((suggestedMedicine: IMedicine) => {
               const isInCart = cartItems.some((item) => item._id === suggestedMedicine._id);
               const isOutOfStock = suggestedMedicine.quantity === 0;
-
               return (
                 <div
                   key={suggestedMedicine._id}
-                  className=" bg-[#e6f4f1] shadow-md rounded-md overflow-hidden p-4"
+                  className="bg-[#e6f4f1] shadow-md rounded-md overflow-hidden p-4"
                 >
                   <div className="relative w-full h-[200px] mb-4 rounded-md overflow-hidden">
                     <Image
@@ -318,21 +302,17 @@ const MedicineDetailsPage = () => {
                       className="rounded-md"
                     />
                   </div>
-
                   <h3 className="font-semibold text-lg text-gray-800 mb-2">
                     {suggestedMedicine.name}
                   </h3>
-
                   <div className="flex gap-0 mb-1">
                     <p className="bg-red-800 text-white px-2">Generic -</p>
                     <p className="bg-red-100 px-2">{suggestedMedicine.generic}</p>
                   </div>
-
                   <div className="flex gap-0">
                     <p className="bg-blue-100 px-2">Category</p>
                     <p className="bg-blue-100 px-2">{suggestedMedicine.category}</p>
                   </div>
-
                   <p className="text-xl font-bold text-blue-600 mt-2">
                     ${suggestedMedicine.price.toFixed(2)}
                   </p>
@@ -342,7 +322,6 @@ const MedicineDetailsPage = () => {
                       {suggestedMedicine.prescriptionRequired ? "✔" : "✘"}
                     </p>
                   </div>
-
                   <div className="flex justify-between mt-4">
                     <Link
                       href={`/medicine/${suggestedMedicine._id}`}
