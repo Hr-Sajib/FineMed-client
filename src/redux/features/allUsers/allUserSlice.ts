@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "@/redux/store"; // Adjust path as needed
 import { IUser } from "../user/userSlice";
+import { logout } from "../auth/authSlice";
 
 
 
@@ -23,6 +24,11 @@ const allUserSlice = createSlice({
     setAllUsers: (state, action: PayloadAction<IUser[]>) => {
       state.users = action.payload;
     }
+  },
+  extraReducers: (builder) => {
+    // Clear all-users data (admin-only PII) whenever the user logs out,
+    // so it can't linger in memory for a different user in the same session.
+    builder.addCase(logout, () => initialState);
   },
 });
 

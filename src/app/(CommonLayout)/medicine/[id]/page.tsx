@@ -12,6 +12,7 @@ import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 import { IMedicine } from "@/types";
+import moment from "moment";
 
 // Skeleton component for a single medicine card
 const MedicineCardSkeleton = () => {
@@ -228,7 +229,8 @@ const MedicineDetailsPage = () => {
                   <strong className="text-gray-800">Manufacturer:</strong> {medicine.manufacturer}
                 </p>
                 <p>
-                  <strong className="text-gray-800">Expiry:</strong> {medicine.expiryDate}
+                  <strong className="text-gray-800">Expiry:</strong>{" "}
+                  {medicine.expiryDate ? moment(medicine.expiryDate).format("MMMM D, YYYY") : "N/A"}
                 </p>
                 <p>
                   <strong className="text-gray-800">Category:</strong> {medicine.category}

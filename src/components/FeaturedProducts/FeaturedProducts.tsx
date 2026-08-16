@@ -8,9 +8,14 @@ import { IMedicine } from "@/types";
 import Aos from "aos";
 import "aos/dist/aos.css";
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import Button from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
+import PriceTag from "@/components/ui/PriceTag";
+import SectionHeading from "@/components/ui/SectionHeading";
 
 // Skeleton component for a single medicine card
 const MedicineCardSkeleton = () => {
@@ -90,105 +95,83 @@ export default function FeaturedProducts() {
 
   if (isLoading) {
     return (
-      <div className="bg-white container mx-auto lg:my-48 my-30">
-        <h3 data-aos="fade-right" className="text-gray-800 text-3xl font-bold px-4 border-l-4 border-teal-600 mb-6">
-          <span className="text-teal-600">Featured</span> Medicine
-        </h3>
-        {/* Skeleton Grid */}
-        <div className="grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-2">
-          {[...Array(4)].map((_, index) => (
-            <MedicineCardSkeleton key={index} />
-          ))}
+      <section className="bg-surface py-16 sm:py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <SectionHeading eyebrow="Handpicked" title="Featured Medicine" className="mb-8" />
+          {/* Skeleton Grid */}
+          <div className="grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-5">
+            {[...Array(4)].map((_, index) => (
+              <MedicineCardSkeleton key={index} />
+            ))}
+          </div>
         </div>
-      </div>
+      </section>
     );
   }
 
   if (error) return <div>Error loading medicines</div>;
 
   return (
-    <div className="bg-white container mx-auto lg:my-48 my-30 px-5 lg:!px-0">
-      <h3 className="text-gray-800 text-3xl font-bold px-4 border-l-4 border-teal-600 mb-6">
-        <span className="text-teal-600">Featured</span> Medicine
-      </h3>
+    <section className="bg-surface py-16 sm:py-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <SectionHeading eyebrow="Handpicked" title="Featured Medicine" className="mb-8" />
 
-      {/* 🧾 Medicines Grid */}
-      <div className="grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-4">
-        {medicineData.slice(0,12).map((medicine: IMedicine) => {
-          const isInCart = cartItems.some((item) => item._id === medicine._id);
-          const isOutOfStock = medicine.quantity === 0;
+        {/* 🧾 Medicines Grid */}
+        <div className="grid lg:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-5">
+          {medicineData.slice(0,12).map((medicine: IMedicine) => {
+            const isInCart = cartItems.some((item) => item._id === medicine._id);
+            const isOutOfStock = medicine.quantity === 0;
 
-          return (
-            <div
-              data-aos="zoom-in"
-              key={medicine._id}
-              className="bg-[#e6f4f1] shadow-md rounded-xl overflow-hidden p-4"
-            >
-              <div className="relative w-full h-[200px] mb-4 rounded-md overflow-hidden">
-                <Image
-                  src={medicine.image}
-                  alt={medicine.name}
-                  fill
-                  style={{ objectFit: "cover" }}
-                  className="rounded-md"
-                />
-              </div>
+            return (
+              <div
+                data-aos="zoom-in"
+                key={medicine._id}
+                className="flex flex-col bg-paper border border-border rounded-2xl shadow-[var(--shadow-card)] overflow-hidden p-4 transition-shadow duration-200 hover:shadow-[var(--shadow-card-hover)]"
+              >
+                <div className="relative w-full h-[180px] mb-4 rounded-xl overflow-hidden bg-paper-deep">
+                  <Image
+                    src={medicine.image}
+                    alt={medicine.name}
+                    fill
+                    style={{ objectFit: "cover" }}
+                    className="rounded-xl"
+                  />
+                </div>
 
-              <h3 className="font-semibold text-lg text-gray-800 mb-2">
-                {medicine.name}
-              </h3>
+                <h3 className="font-display font-semibold text-lg text-ink mb-2 truncate" title={medicine.name}>
+                  {medicine.name}
+                </h3>
 
-              <div className="flex gap-0 mb-1">
-                    <p className="bg-red-800 text-white px-2">Generic -</p>
-                    <p className="bg-red-100 px-2">{medicine.generic}</p>
-                  </div>
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  <Badge variant="brand">{medicine.generic}</Badge>
+                  <Badge variant="neutral">{medicine.category}</Badge>
+                  {medicine.prescriptionRequired && <Badge variant="danger">Rx Required</Badge>}
+                </div>
 
-                  <div className="flex gap-0">
-                    <p className="bg-blue-100 px-2">Category</p>
-                    <p className="bg-blue-100 px-2">{medicine.category}</p>
-              </div>
+                <PriceTag value={medicine.price} className="mt-auto" />
 
-              <p className="text-xl font-bold text-blue-600 mt-2">
-                ${medicine.price}
-              </p>
-              <div className="flex gap-2">
-                <p>Prescription</p>
-                <p className="text-2xl relative bottom-1 text-red-600">
-                  {medicine.prescriptionRequired ? "✔" : "✘"}
-                </p>
-              </div>
-
-              <div className="flex justify-between mt-4">
-                <Link
-                  href={`/medicine/${medicine._id}`}
-                  className="bg-blue-200 text-black py-1 px-3 rounded-full hover:bg-blue-800 hover:text-white"
+                <div className="flex items-center justify-between gap-2 mt-4">
+                  <Button href={`/medicine/${medicine._id}`} variant="outline" size="sm">
+                    Details
+                  </Button>
+                  <Button
+                    size="sm"
+                    disabled={isInCart || isOutOfStock}
+                    onClick={() => handleAddToCart(medicine)}
                   >
-                  Details
-                </Link>
-                <button
-                  disabled={isInCart || isOutOfStock}
-                  onClick={() => handleAddToCart(medicine)}
-                  className={`py-1 px-3 rounded-full text-white ${
-                    isInCart || isOutOfStock
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-green-600 hover:bg-green-700"
-                  }`}
-                >
-                  {isInCart ? "Added" : isOutOfStock ? "Out of Stock" : "Add to Cart"}
-                </button>
+                    {isInCart ? "Added" : isOutOfStock ? "Out of Stock" : "Add to Cart"}
+                  </Button>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+        <div className="mt-10 flex justify-center">
+          <Button href="/shop" variant="secondary" icon={<FontAwesomeIcon icon={faArrowRight} />} iconPosition="right">
+            View More Medicine
+          </Button>
+        </div>
       </div>
-      <div className="mt-10 flex justify-center">
-        <Link
-          className="flex items-center gap-2 text-blue-700 text-lg"
-          href="/shop"
-        >
-          View More Medicine...
-        </Link>
-      </div>
-    </div>
+    </section>
   );
 }

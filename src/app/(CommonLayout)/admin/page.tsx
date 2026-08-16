@@ -10,12 +10,29 @@ import { useGetAllMedicinesQuery } from "@/redux/features/medicine/medicineApi";
 import { useGetAllOrdersQuery } from "@/redux/features/order/orderApi";
 import { useGetAllUserQuery } from "@/redux/features/user/userApi";
 import { setAllUsers, selectAllUsers } from "@/redux/features/allUsers/allUserSlice";
-import { setOrders, selectOrders } from "@/redux/features/order/orderSlice";
+import { setOrders, selectOrders, IOrder } from "@/redux/features/order/orderSlice";
 import { setMedicines, selectMedicines } from "@/redux/features/medicine/medicineSlice";
 import { useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUserGroup, faTruckMedical, faCapsules } from "@fortawesome/free-solid-svg-icons";
+import Card from "@/components/ui/Card";
+import SectionHeading from "@/components/ui/SectionHeading";
 
 // Register Chart.js components
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
+
+// Categorical palette drawn from the Digital Apothecary tokens — pharmacy
+// green as the dominant signature, rx red and amber as secondary accents,
+// muted grays to round out longer category lists.
+const CHART_COLORS = {
+  pharmacy: "#0f7a4a",
+  pharmacyDeep: "#0a5c37",
+  pharmacyLight: "#8fcdac",
+  rx: "#c6412f",
+  amber: "#b8790f",
+  muted: "#6b7a75",
+  border: "#dbe6e0",
+};
 
 const AdminDefaultPage = () => {
   const dispatch = useDispatch();
@@ -55,7 +72,9 @@ const AdminDefaultPage = () => {
   // Set orders in store
   useEffect(() => {
     if (ordersData?.data) {
-      dispatch(setOrders(ordersData.data));
+      // GET /orders returns products.productId populated as a full object;
+      // the orders slice's IOrder type still models it as a plain string id.
+      dispatch(setOrders(ordersData.data as unknown as IOrder[]));
     }
   }, [ordersData, dispatch]);
 
@@ -117,9 +136,10 @@ const AdminDefaultPage = () => {
       {
         label: "Total Counts",
         data: [userStats.total, orderStats.total, medicineStats.total],
-        backgroundColor: "#0d9488", // teal-600
-        borderColor: "#0a7466", // teal-700
+        backgroundColor: CHART_COLORS.pharmacy,
+        borderColor: CHART_COLORS.pharmacyDeep,
         borderWidth: 1,
+        borderRadius: 8,
       },
     ],
   };
@@ -130,9 +150,9 @@ const AdminDefaultPage = () => {
     datasets: [
       {
         data: [userStats.byRole.admin, userStats.byRole.user],
-        backgroundColor: ["#0d9488", "#4dc0b5"], // teal-600, teal-400
+        backgroundColor: [CHART_COLORS.pharmacyDeep, CHART_COLORS.pharmacyLight],
         borderColor: "#fff",
-        borderWidth: 1,
+        borderWidth: 2,
       },
     ],
   };
@@ -147,9 +167,9 @@ const AdminDefaultPage = () => {
           orderStats.byStatus.shipped,
           orderStats.byStatus.delivered,
         ],
-        backgroundColor: ["#0d9488", "#4dc0b5", "#b2e3d8", "#e6f4f1"], // teal shades
+        backgroundColor: [CHART_COLORS.amber, CHART_COLORS.pharmacyLight, CHART_COLORS.muted, CHART_COLORS.pharmacy],
         borderColor: "#fff",
-        borderWidth: 1,
+        borderWidth: 2,
       },
     ],
   };
@@ -165,9 +185,15 @@ const AdminDefaultPage = () => {
           medicineStats.byCategory.Antiseptic,
           medicineStats.byCategory.Antiviral,
         ],
-        backgroundColor: ["#0d9488", "#4dc0b5", "#b2e3d8", "#e6f4f1", "#2c7a7b"], // teal shades
+        backgroundColor: [
+          CHART_COLORS.pharmacy,
+          CHART_COLORS.rx,
+          CHART_COLORS.amber,
+          CHART_COLORS.muted,
+          CHART_COLORS.pharmacyLight,
+        ],
         borderColor: "#fff",
-        borderWidth: 1,
+        borderWidth: 2,
       },
     ],
   };
@@ -179,7 +205,7 @@ const AdminDefaultPage = () => {
     plugins: {
       legend: {
         position: "top" as const,
-        labels: { color: "#1f2937" }, // gray-800
+        labels: { color: "#3d4d47", font: { family: "var(--font-sans)" } },
       },
     },
   };
@@ -189,10 +215,12 @@ const AdminDefaultPage = () => {
     scales: {
       y: {
         beginAtZero: true,
-        ticks: { color: "#1f2937" },
+        ticks: { color: "#3d4d47" },
+        grid: { color: "#dbe6e0" },
       },
       x: {
-        ticks: { color: "#1f2937" },
+        ticks: { color: "#3d4d47" },
+        grid: { display: false },
       },
     },
   };
@@ -201,14 +229,14 @@ const AdminDefaultPage = () => {
   if (usersLoading || ordersLoading || medicinesLoading) {
     console.log("Loading states:", { usersLoading, ordersLoading, medicinesLoading });
     return (
-      <div className="min-h-[70vh] py-12 px-6 lg:px-8 max-w-7xl mx-auto">
-        <h2 className="text-3xl font-semibold text-gray-800 text-center mb-8">Admin Dashboard</h2>
+      <div className="min-h-[70vh] max-w-7xl mx-auto">
+        <SectionHeading eyebrow="Clinical Ops" title="Admin Overview" className="mb-8" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {[...Array(6)].map((_, index) => (
-            <div key={index} className="bg-white p-6 rounded-xl shadow-md animate-pulse">
-              <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
-              <div className="h-40 bg-gray-200 rounded"></div>
-            </div>
+            <Card key={index} className="animate-pulse">
+              <div className="h-6 bg-paper-deep rounded w-1/2 mb-4"></div>
+              <div className="h-40 bg-paper-deep rounded"></div>
+            </Card>
           ))}
         </div>
       </div>
@@ -218,63 +246,88 @@ const AdminDefaultPage = () => {
   if (usersError || ordersError || medicinesError) {
     console.error("Rendering error state:", { usersError, ordersError, medicinesError });
     return (
-      <div className="min-h-[70vh] py-12 px-6 lg:px-8 max-w-7xl mx-auto text-center text-red-600">
+      <div className="min-h-[70vh] max-w-7xl mx-auto text-center text-rx">
         Error loading dashboard data: {JSON.stringify(usersError || ordersError || medicinesError)}
       </div>
     );
   }
 
+  const statTiles = [
+    { label: "Total Users", value: userStats.total, icon: faUserGroup },
+    { label: "Total Orders", value: orderStats.total, icon: faTruckMedical },
+    { label: "Total Medicines", value: medicineStats.total, icon: faCapsules },
+  ];
+
   return (
-    <div className="min-h-[70vh] py-12 px-6 lg:px-8 max-w-7xl mx-auto">
-      <h2 className="text-3xl font-semibold text-gray-800 text-center mb-8">Admin Dashboard</h2>
+    <div className="min-h-[70vh] max-w-7xl mx-auto">
+      <SectionHeading eyebrow="Clinical Ops" title="Admin Overview" className="mb-8" />
+
+      {/* Stat tiles */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6">
+        {statTiles.map((tile) => (
+          <Card key={tile.label} className="flex items-center gap-4">
+            <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-pharmacy-light text-pharmacy-deep">
+              <FontAwesomeIcon icon={tile.icon} className="h-5 w-5" />
+            </span>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">{tile.label}</p>
+              <p className="font-mono text-2xl font-semibold text-ink">{tile.value}</p>
+            </div>
+          </Card>
+        ))}
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Total Counts Bar Chart */}
-        <div className="bg-white p-6 rounded-xl shadow-md">
-          <h3 className="text-lg font-semibold text-teal-700 mb-4">Total Counts</h3>
+        <Card>
+          <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-pharmacy-deep mb-4">Total Counts</h3>
           <div className="h-64">
             <Bar data={barData} options={barOptions} />
           </div>
-        </div>
+        </Card>
 
         {/* Users by Role Pie Chart */}
-        <div className="bg-white p-6 rounded-xl shadow-md">
-          <h3 className="text-lg font-semibold text-teal-700 mb-4">Users by Role</h3>
+        <Card>
+          <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-pharmacy-deep mb-4">Users by Role</h3>
           <div className="h-64">
             <Pie data={userPieData} options={chartOptions} />
           </div>
-        </div>
+        </Card>
 
         {/* Orders by Status Pie Chart */}
-        <div className="bg-white p-6 rounded-xl shadow-md">
-          <h3 className="text-lg font-semibold text-teal-700 mb-4">Orders by Status</h3>
+        <Card>
+          <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-pharmacy-deep mb-4">Orders by Status</h3>
           <div className="h-64">
             <Pie data={orderPieData} options={chartOptions} />
           </div>
-        </div>
+        </Card>
 
         {/* Medicines by Category Pie Chart */}
-        <div className="bg-white p-6 rounded-xl shadow-md">
-          <h3 className="text-lg font-semibold text-teal-700 mb-4">Medicines by Category</h3>
+        <Card>
+          <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-pharmacy-deep mb-4">Medicines by Category</h3>
           <div className="h-64">
             <Pie data={medicinePieData} options={chartOptions} />
           </div>
-        </div>
+        </Card>
 
         {/* Summary Stats */}
-        <div className="bg-white p-6 rounded-xl shadow-md">
-          <h3 className="text-lg font-semibold text-teal-700 mb-4">Summary</h3>
-          <ul className="space-y-2">
-            <li className="text-gray-800">
-              <span className="font-medium">Total Users:</span> {userStats.total}
+        <Card>
+          <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-pharmacy-deep mb-4">Summary</h3>
+          <ul className="space-y-3">
+            <li className="flex items-center justify-between text-sm text-ink-soft">
+              <span>Total Users</span>
+              <span className="font-mono font-semibold text-ink">{userStats.total}</span>
             </li>
-            <li className="text-gray-800">
-              <span className="font-medium">Total Orders:</span> {orderStats.total}
+            <li className="flex items-center justify-between text-sm text-ink-soft">
+              <span>Total Orders</span>
+              <span className="font-mono font-semibold text-ink">{orderStats.total}</span>
             </li>
-            <li className="text-gray-800">
-              <span className="font-medium">Total Medicines:</span> {medicineStats.total}
+            <li className="flex items-center justify-between text-sm text-ink-soft">
+              <span>Total Medicines</span>
+              <span className="font-mono font-semibold text-ink">{medicineStats.total}</span>
             </li>
           </ul>
-        </div>
+        </Card>
       </div>
     </div>
   );

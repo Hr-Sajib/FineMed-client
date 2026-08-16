@@ -8,6 +8,13 @@ import { IMedicine } from "@/types";
 import UpdateMedicineModal from "@/components/admin/UpdateProductModal";
 import AddMedicineModal from "@/components/admin/AddMedicineModal";
 import { useGetAllMedicinesQuery } from "@/redux/features/medicine/medicineApi";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faPenToSquare, faChevronLeft, faChevronRight, faCapsules } from "@fortawesome/free-solid-svg-icons";
+import Button from "@/components/ui/Button";
+import Card from "@/components/ui/Card";
+import Badge from "@/components/ui/Badge";
+import PriceTag from "@/components/ui/PriceTag";
+import SectionHeading from "@/components/ui/SectionHeading";
 
 const Medicines = () => {
   const dispatch = useDispatch();
@@ -76,82 +83,97 @@ const Medicines = () => {
   };
 
   return (
-    <div className="min-h-[70vh] p-6 space-y-12 mb-10">
+    <div className="min-h-[70vh] space-y-8 mb-10 max-w-7xl mx-auto">
       {/* Medicines Table */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-700 text-center mb-8">All Medicines</h1>
-        <div className="flex my-2 justify-center">
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="bg-amber-200 p-2 rounded-md"
-          >
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <SectionHeading eyebrow="Inventory" title="All Medicines" />
+          <Button onClick={() => setIsAddModalOpen(true)} icon={<FontAwesomeIcon icon={faPlus} />}>
             Add Medicine
-          </button>
+          </Button>
         </div>
         {medicines && medicines.length > 0 ? (
           <>
-            <div className="overflow-x-auto shadow-md rounded-lg border border-gray-200">
-              <table className="min-w-full bg-white table-fixed">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="w-1/5 py-3 px-4 text-left text-sm font-semibold text-gray-700">
-                      Name
-                    </th>
-                    <th className="w-1/5 py-3 px-4 text-left text-sm font-semibold text-gray-700">
-                      Brand
-                    </th>
-                    <th className="w-1/5 py-3 px-4 text-left text-sm font-semibold text-gray-700">
-                      Quantity
-                    </th>
-                    <th className="w-1/5 py-3 px-4 text-left text-sm font-semibold text-gray-700">
-                      Price
-                    </th>
-                    <th className="w-1/5 py-3 px-4 text-left text-sm font-semibold text-gray-700">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedMedicines.map((med) => (
-                    <tr key={med._id} className="border-b hover:bg-gray-50">
-                      <td className="py-3 px-4 text-sm text-gray-600">{med.name}</td>
-                      <td className="py-3 px-4 text-sm text-gray-600">{med.brand}</td>
-                      <td className="py-3 px-4 text-sm text-gray-600">{med.quantity}</td>
-                      <td className="py-3 px-4 text-sm text-gray-600">${med.price}</td>
-                      <td className="py-3 px-4">
-                        <button
-                          onClick={() => handleUpdateMedicine(med)}
-                          className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 transition"
-                        >
-                          Update
-                        </button>
-                      </td>
+            <Card padding="none" className="overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead className="bg-paper-deep">
+                    <tr>
+                      <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-[0.06em] text-ink-soft">
+                        Name
+                      </th>
+                      <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-[0.06em] text-ink-soft">
+                        Brand
+                      </th>
+                      <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-[0.06em] text-ink-soft">
+                        Quantity
+                      </th>
+                      <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-[0.06em] text-ink-soft">
+                        Price
+                      </th>
+                      <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-[0.06em] text-ink-soft">
+                        Actions
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {paginatedMedicines.map((med) => (
+                      <tr key={med._id} className="hover:bg-paper-deep/50 transition-colors">
+                        <td className="py-3 px-4 text-sm text-ink font-medium whitespace-nowrap">
+                          <span className="inline-flex items-center gap-2">
+                            <FontAwesomeIcon icon={faCapsules} className="h-3.5 w-3.5 text-pharmacy" />
+                            {med.name}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-sm text-ink-soft whitespace-nowrap">{med.brand}</td>
+                        <td className="py-3 px-4 text-sm font-mono text-ink-soft whitespace-nowrap">
+                          {med.quantity <= 10 ? (
+                            <Badge variant="danger">{med.quantity} left</Badge>
+                          ) : (
+                            med.quantity
+                          )}
+                        </td>
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          <PriceTag value={med.price} size="sm" />
+                        </td>
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            icon={<FontAwesomeIcon icon={faPenToSquare} />}
+                            onClick={() => handleUpdateMedicine(med)}
+                          >
+                            Update
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
             {/* Pagination Controls */}
-            <div className="flex justify-center mt-4 space-x-2">
+            <div className="flex justify-center items-center mt-4 gap-2">
               <button
                 onClick={handlePrevious}
                 disabled={currentPage === 1}
-                className={`px-4 py-2 bg-gray-100 text-gray-700 rounded-md ${
+                className={`h-9 w-9 flex items-center justify-center rounded-full bg-surface border border-border text-ink-soft ${
                   currentPage === 1
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-gray-200"
+                    ? "opacity-40 cursor-not-allowed"
+                    : "hover:bg-pharmacy-light hover:text-pharmacy-deep"
                 }`}
+                aria-label="Previous page"
               >
-                Previous
+                <FontAwesomeIcon icon={faChevronLeft} className="h-3.5 w-3.5" />
               </button>
               {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
                 <button
                   key={page}
                   onClick={() => handlePageChange(page)}
-                  className={`px-4 py-2 rounded-md ${
+                  className={`h-9 w-9 flex items-center justify-center rounded-full text-sm font-medium transition-colors ${
                     currentPage === page
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      ? "bg-pharmacy text-white"
+                      : "bg-surface border border-border text-ink-soft hover:bg-pharmacy-light hover:text-pharmacy-deep"
                   }`}
                 >
                   {page}
@@ -160,18 +182,19 @@ const Medicines = () => {
               <button
                 onClick={handleNext}
                 disabled={currentPage === totalPages}
-                className={`px-4 py-2 bg-gray-100 text-gray-700 rounded-md ${
+                className={`h-9 w-9 flex items-center justify-center rounded-full bg-surface border border-border text-ink-soft ${
                   currentPage === totalPages
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-gray-200"
+                    ? "opacity-40 cursor-not-allowed"
+                    : "hover:bg-pharmacy-light hover:text-pharmacy-deep"
                 }`}
+                aria-label="Next page"
               >
-                Next
+                <FontAwesomeIcon icon={faChevronRight} className="h-3.5 w-3.5" />
               </button>
             </div>
           </>
         ) : (
-          <p className="text-center text-gray-500 mt-4">No medicines found.</p>
+          <p className="text-center text-muted mt-4">No medicines found.</p>
         )}
       </div>
 

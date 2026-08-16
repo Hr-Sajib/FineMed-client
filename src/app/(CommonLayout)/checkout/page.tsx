@@ -381,7 +381,7 @@ const CheckoutPage = () => {
                           prescription ? "bg-teal-50" : "bg-white"
                         } text-gray-500 flex items-center justify-between`}
                       >
-                        <span>{prescription ? `📂 File Choosen » ${prescription.name.slice(0,40)} ...` : "Choose File"}</span>
+                        <span>{prescription ? `📂 File Chosen » ${prescription.name.slice(0,40)} ...` : "Choose File"}</span>
                       </div>
                     </div>
                   </div>

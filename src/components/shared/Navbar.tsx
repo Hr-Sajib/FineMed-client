@@ -7,7 +7,22 @@ import { useAppSelector } from "@/redux/hooks";
 import { useSelector, useDispatch } from "react-redux";
 import { selectCurrentUser, logout } from "@/redux/features/auth/authSlice";
 import { toast } from "sonner";
-import { FiUser } from "react-icons/fi";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCartShopping,
+  faUser,
+  faBars,
+  faXmark,
+  faChevronDown,
+  faRightFromBracket,
+  faCapsules,
+  faPills,
+  faShieldHeart,
+  faStethoscope,
+  faVirus,
+} from "@fortawesome/free-solid-svg-icons";
+import Logo from "./Logo";
+import Button from "@/components/ui/Button";
 
 const Navbar = () => {
   const pathname = usePathname();
@@ -20,17 +35,14 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const profileRef = useRef<HTMLDivElement>(null);
 
-  // console.log("user: ", user);
-
   const handleLogout = () => {
     dispatch(logout());
-    toast("✅ Logged Out");
+    toast.success("Logged out");
     setMenuOpen(false);
     setMegaMenuOpen(false);
     setProfileMenuOpen(false);
   };
 
-  // Close profile menu on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
@@ -46,10 +58,6 @@ const Navbar = () => {
   const navLinks = [
     { href: "/", label: "Home" },
     { href: "/shop", label: "Shop", isMegaMenu: true },
-    { href: "/cart", label: "Cart" },
-    { href: "/checkout", label: "Checkout" },
-    { href: "/about", label: "About" },
-    { href: "/review", label: "Reviews" },
     ...(user
       ? [
           user.role === "admin"
@@ -59,51 +67,25 @@ const Navbar = () => {
       : []),
   ];
 
-  // Categories aligned with AllMedicinesPage
   const shopCategories = [
-    {
-      title: "Medicine Categories",
-      items: [
-        { href: "/shop?category=Antibiotic", label: "Antibiotic" },
-        { href: "/shop?category=Painkiller", label: "Painkiller" },
-        { href: "/shop?category=Antacid", label: "Antacid" },
-        { href: "/shop?category=Antiseptic", label: "Antiseptic" },
-        { href: "/shop?category=Antiviral", label: "Antiviral" },
-      ],
-    },
+    { href: "/shop?category=Antibiotic", label: "Antibiotic", icon: faVirus },
+    { href: "/shop?category=Painkiller", label: "Painkiller", icon: faPills },
+    { href: "/shop?category=Antacid", label: "Antacid", icon: faCapsules },
+    { href: "/shop?category=Antiseptic", label: "Antiseptic", icon: faShieldHeart },
+    { href: "/shop?category=Antiviral", label: "Antiviral", icon: faStethoscope },
   ];
 
-  // Check if the current path is exactly "/shop"
   const isShopPage = pathname === "/shop";
+  const isAdmin = user?.role === "admin";
 
   return (
-    <nav className={`${user?.role === "admin" ? "bg-teal-50" : "bg-white"} shadow-md sticky top-0 z-90 w-full`}>
-      <div className="mx-auto px-4 sm:px-6 lg:px-[8vw]">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <svg
-              className="h-8 w-8 text-teal-600"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
-              />
-            </svg>
-            {user?.role === "admin" ? (
-              <span className="font-bold text-xl text-teal-600">FineMed \ Admin</span>
-            ) : (
-              <span className="font-bold text-xl text-teal-600">FineMed</span>
-            )}
-          </Link>
+    <nav className="sticky top-0 z-50 w-full border-b border-border bg-surface/95 backdrop-blur">
+      <div className="mx-auto px-4 sm:px-6 lg:px-[6vw]">
+        <div className="flex h-16 items-center justify-between">
+          <Logo admin={isAdmin} />
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) =>
               link.isMegaMenu && !isShopPage ? (
                 <div
@@ -114,36 +96,33 @@ const Navbar = () => {
                 >
                   <Link
                     href={link.href}
-                    className={`relative text-md font-medium ${
+                    className={`flex items-center gap-1 rounded-full px-3.5 py-2 text-sm font-medium transition-colors ${
                       pathname === link.href
-                        ? "text-teal-600 border-b-2 border-teal-600"
-                        : "text-gray-700 hover:text-teal-600"
+                        ? "bg-pharmacy-light text-pharmacy-deep"
+                        : "text-ink-soft hover:bg-paper-deep hover:text-ink"
                     }`}
                   >
                     {link.label}
+                    <FontAwesomeIcon icon={faChevronDown} className="h-2.5 w-2.5" />
                   </Link>
                   {megaMenuOpen && (
-                    <div className="absolute left-0 mt-2 w-[300px] bg-teal-600 shadow-lg rounded-md z-50 p-6">
-                      {shopCategories.map((category) => (
-                        <div key={category.title} className="">
-                          <h3 className="font-semibold text-white mb-2">
-                            {category.title}
-                          </h3>
-                          <ul className="space-y-1">
-                            {category.items.map((item) => (
-                              <li key={item.href} className="">
-                                <Link
-                                  href={item.href}
-                                  className="text-white hover:font-bold"
-                                  onClick={() => setMegaMenuOpen(false)}
-                                >
-                                  {item.label}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
+                    <div className="absolute left-0 mt-1 w-64 rounded-2xl border border-border bg-surface p-3 shadow-[var(--shadow-card-hover)]">
+                      <p className="px-2 pb-2 pt-1 text-[11px] font-semibold uppercase tracking-wide text-muted">
+                        Shop by category
+                      </p>
+                      <div className="space-y-0.5">
+                        {shopCategories.map((item) => (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            className="flex items-center gap-3 rounded-xl px-2.5 py-2 text-sm text-ink-soft transition-colors hover:bg-pharmacy-light hover:text-pharmacy-deep"
+                            onClick={() => setMegaMenuOpen(false)}
+                          >
+                            <FontAwesomeIcon icon={item.icon} className="h-3.5 w-3.5" />
+                            {item.label}
+                          </Link>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -151,97 +130,92 @@ const Navbar = () => {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`relative text-md font-medium ${
+                  className={`rounded-full px-3.5 py-2 text-sm font-medium transition-colors ${
                     pathname === link.href
-                      ? "text-teal-600 border-b-2 border-teal-600"
-                      : "text-gray-700 hover:text-teal-600"
+                      ? "bg-pharmacy-light text-pharmacy-deep"
+                      : "text-ink-soft hover:bg-paper-deep hover:text-ink"
                   }`}
                 >
                   {link.label}
-                  {link.href === "/cart" && cartItems > 0 && (
-                    <span className="absolute -top-2 -right-4 bg-teal-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                      {cartItems}
-                    </span>
-                  )}
                 </Link>
               )
             )}
 
-            {/* Auth Section */}
+            <Link
+              href="/cart"
+              className={`relative ml-1 flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
+                pathname === "/cart"
+                  ? "bg-pharmacy-light text-pharmacy-deep"
+                  : "text-ink-soft hover:bg-paper-deep hover:text-ink"
+              }`}
+              aria-label="Cart"
+            >
+              <FontAwesomeIcon icon={faCartShopping} className="h-4 w-4" />
+              {cartItems > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-4.5 w-4.5 min-w-4.5 items-center justify-center rounded-full bg-rx px-1 font-mono text-[10px] font-semibold text-white">
+                  {cartItems}
+                </span>
+              )}
+            </Link>
+
             {user ? (
-              <div className="relative ml-4" ref={profileRef}>
+              <div className="relative ml-1" ref={profileRef}>
                 <button
                   onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                  className="flex items-center justify-center h-8 w-8 rounded-full bg-teal-600 text-white hover:bg-teal-700 transition"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-pharmacy text-white transition-colors hover:bg-pharmacy-deep"
                   aria-label="Open profile menu"
                 >
-                  <FiUser size={20} />
+                  <FontAwesomeIcon icon={faUser} className="h-4 w-4" />
                 </button>
                 {profileMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-teal-600 text-white rounded-md shadow-lg z-50 p-2">
+                  <div className="absolute right-0 mt-2 w-52 rounded-2xl border border-border bg-surface p-1.5 shadow-[var(--shadow-card-hover)]">
+                    <p className="truncate px-3 pb-1.5 pt-1.5 text-xs text-muted">
+                      {user.userEmail}
+                    </p>
                     <Link
-                      href="/profile"
-                      className="block px-4 py-2 text-sm hover:bg-teal-700 rounded-md"
+                      href={isAdmin ? "/admin" : "/profile"}
+                      className="block rounded-xl px-3 py-2 text-sm text-ink-soft hover:bg-paper-deep"
                       onClick={() => setProfileMenuOpen(false)}
-                      aria-label="Go to profile"
                     >
-                      Profile
+                      {isAdmin ? "Admin Dashboard" : "My Profile"}
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-sm hover:bg-teal-700 rounded-md"
-                      aria-label="Log out"
+                      className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-rx hover:bg-rx-light"
                     >
-                      Log Out
+                      <FontAwesomeIcon icon={faRightFromBracket} className="h-3.5 w-3.5" />
+                      Log out
                     </button>
                   </div>
                 )}
               </div>
             ) : (
-              <Link
-                href="/login"
-                className="ml-4 px-4 py-2 bg-teal-600 text-white rounded-full hover:bg-teal-700 transition text-sm font-medium"
-              >
-                Login
-              </Link>
+              <Button href="/login" size="sm" className="ml-2">
+                Log in
+              </Button>
             )}
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          {/* Mobile controls */}
+          <div className="flex items-center gap-1 md:hidden">
+            <Link
+              href="/cart"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full text-ink-soft"
+              aria-label="Cart"
+            >
+              <FontAwesomeIcon icon={faCartShopping} className="h-4 w-4" />
+              {cartItems > 0 && (
+                <span className="absolute top-0.5 right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-rx font-mono text-[9px] font-semibold text-white">
+                  {cartItems}
+                </span>
+              )}
+            </Link>
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="p-2 rounded-md text-gray-700 hover:text-teal-600 focus:outline-none"
+              className="flex h-10 w-10 items-center justify-center rounded-full text-ink-soft hover:bg-paper-deep"
+              aria-label="Toggle menu"
             >
-              {menuOpen ? (
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              )}
+              <FontAwesomeIcon icon={menuOpen ? faXmark : faBars} className="h-4.5 w-4.5" />
             </button>
           </div>
         </div>
@@ -249,45 +223,37 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <div className="md:hidden bg-white shadow-md">
-          <div className="px-2 pt-2 pb-4 space-y-1">
+        <div className="border-t border-border bg-surface md:hidden">
+          <div className="space-y-1 px-3 py-3">
             {navLinks.map((link) =>
               link.isMegaMenu && !isShopPage ? (
                 <div key={link.href}>
                   <button
                     onClick={() => setMegaMenuOpen(!megaMenuOpen)}
-                    className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium ${
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-medium ${
                       pathname === link.href
-                        ? "bg-teal-600 text-white"
-                        : "text-gray-700 hover:bg-teal-100 hover:text-teal-800"
+                        ? "bg-pharmacy text-white"
+                        : "text-ink-soft hover:bg-paper-deep"
                     }`}
                   >
                     {link.label}
+                    <FontAwesomeIcon icon={faChevronDown} className="h-3 w-3" />
                   </button>
                   {megaMenuOpen && (
-                    <div className="pl-4 space-y-2">
-                      {shopCategories.map((category) => (
-                        <div key={category.title}>
-                          <h3 className="font-semibold text-gray-800">
-                            {category.title}
-                          </h3>
-                          <ul className="space-y-1">
-                            {category.items.map((item) => (
-                              <li key={item.href}>
-                                <Link
-                                  href={item.href}
-                                  className="block px-3 py-1 text-gray-600 hover:text-teal-600"
-                                  onClick={() => {
-                                    setMenuOpen(false);
-                                    setMegaMenuOpen(false);
-                                  }}
-                                >
-                                  {item.label}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
+                    <div className="mt-1 space-y-0.5 pl-3">
+                      {shopCategories.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-ink-soft hover:bg-paper-deep"
+                          onClick={() => {
+                            setMenuOpen(false);
+                            setMegaMenuOpen(false);
+                          }}
+                        >
+                          <FontAwesomeIcon icon={item.icon} className="h-3.5 w-3.5" />
+                          {item.label}
+                        </Link>
                       ))}
                     </div>
                   )}
@@ -297,60 +263,29 @@ const Navbar = () => {
                   key={link.href}
                   href={link.href}
                   onClick={() => setMenuOpen(false)}
-                  className={`block px-3 py-2 rounded-md text-base font-medium ${
+                  className={`block rounded-xl px-3 py-2.5 text-sm font-medium ${
                     pathname === link.href
-                      ? "bg-teal-600 text-white"
-                      : "text-gray-700 hover:bg-teal-100 hover:text-teal-800"
+                      ? "bg-pharmacy text-white"
+                      : "text-ink-soft hover:bg-paper-deep"
                   }`}
                 >
                   {link.label}
-                  {link.href === "/cart" && cartItems > 0 && ` (${cartItems})`}
                 </Link>
               )
             )}
 
-            {/* Mobile Auth Section */}
             {user ? (
-              <div className="relative ml-2 mt-2">
-                <button
-                  onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                  className="flex items-center px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-teal-100 hover:text-teal-800"
-                  aria-label="Open profile menu"
-                >
-                  <FiUser className="mr-2" size={20} />
-                  Profile
-                </button>
-                {profileMenuOpen && (
-                  <div className="pl-4 space-y-1">
-                    <Link
-                      href="/profile"
-                      className="block px-3 py-2 text-base text-gray-700 hover:bg-teal-100 hover:text-teal-800"
-                      onClick={() => {
-                        setMenuOpen(false);
-                        setProfileMenuOpen(false);
-                      }}
-                      aria-label="Go to profile"
-                    >
-                      Profile
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-3 py-2 text-base text-gray-700 hover:bg-teal-100 hover:text-teal-800"
-                      aria-label="Log out"
-                    >
-                      Log Out
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <Link
-                href="/login"
-                onClick={() => setMenuOpen(false)}
-                className="block px-3 py-2 mt-2 bg-teal-600 ml-2 text-white rounded-full text-base text-center hover:bg-teal-700"
+              <button
+                onClick={handleLogout}
+                className="flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-rx hover:bg-rx-light"
               >
-                Login
-              </Link>
+                <FontAwesomeIcon icon={faRightFromBracket} className="h-3.5 w-3.5" />
+                Log out
+              </button>
+            ) : (
+              <Button href="/login" fullWidth onClick={() => setMenuOpen(false)} className="mt-1">
+                Log in
+              </Button>
             )}
           </div>
         </div>

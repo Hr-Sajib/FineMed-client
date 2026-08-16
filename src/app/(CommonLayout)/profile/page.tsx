@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import { selectCurrentUser } from "@/redux/features/auth/authSlice";
 import {
@@ -245,6 +246,7 @@ const Overview = ({ myOrders }: any) => {
 // Main UserDashboard Component
 const UserDashboard = () => {
   const dispatch = useDispatch();
+  const searchParams = useSearchParams();
   const authUser = useSelector(selectCurrentUser);
   const user = useSelector(selectUser);
   const loading = useSelector(selectUserLoading);
@@ -258,7 +260,11 @@ const UserDashboard = () => {
   const [email, setEmail] = useState("");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [activeTab, setActiveTab] = useState("overview"); // Set default to overview
+  const validTabs = ["overview", "personal", "password", "orders"];
+  const tabFromQuery = searchParams?.get("tab");
+  const [activeTab, setActiveTab] = useState(
+    tabFromQuery && validTabs.includes(tabFromQuery) ? tabFromQuery : "overview"
+  );
 
   // Sync API response with Redux and local states
   useEffect(() => {

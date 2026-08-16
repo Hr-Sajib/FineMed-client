@@ -7,7 +7,10 @@ type TOrder = {
   userName: string;
   userEmail: string;
   products: {
-    productId: string;
+    // GET /orders returns this populated as a full product object;
+    // it may still be a plain string id in other contexts (e.g. before
+    // population, or when creating an order).
+    productId: string | { _id: string; name: string; [key: string]: unknown };
     quantity: number;
   }[];
   totalPrice: number;
@@ -94,6 +97,14 @@ const orderApi = baseApi.injectEndpoints({
         method: "GET",
       }),
     }),
+
+    // Verify an order's prescription (PATCH /orders/verify-prescription/:orderId)
+    verifyPrescription: builder.mutation<OrderResponse, string>({
+      query: (orderId) => ({
+        url: `/orders/verify-prescription/${orderId}`,
+        method: "PATCH",
+      }),
+    }),
   }),
 });
 
@@ -105,6 +116,7 @@ export const {
   useUpdateOrderMutation,
   useDeleteOrderMutation,
   useGetMyOrdersQuery,  // Hook for the new endpoint
+  useVerifyPrescriptionMutation,
 } = orderApi;
 
 export default orderApi;

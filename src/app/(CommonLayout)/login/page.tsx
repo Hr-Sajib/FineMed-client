@@ -10,6 +10,12 @@ import { verifyToken } from "@/utils/verifyToken";
 import { setUser, TUser } from "@/redux/features/auth/authSlice";
 import { useAppDispatch } from "@/redux/hooks";
 import { useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEnvelope, faPhone, faLock, faShieldHeart } from "@fortawesome/free-solid-svg-icons";
+import Logo from "@/components/shared/Logo";
+import Card from "@/components/ui/Card";
+import Button from "@/components/ui/Button";
+import { Label, Input, HelperText } from "@/components/ui/Field";
 
 // Define a custom error type to handle RTK Query error shapes
 interface LoginError {
@@ -48,16 +54,16 @@ export default function Login() {
 
       if (res.data.accessToken) {
         dispatch(setUser({ user, token: res.data.accessToken }));
-        toast("✅ Logged in successfully");
+        toast.success("Logged in successfully");
         router.push("/");
       } else {
-        toast("❌ Gained Token not valid");
+        toast.error("Gained Token not valid");
       }
     } catch (err) {
       const error = err as LoginError;
       console.error("Login failed:", err);
-      toast(
-        `❌ Login failed: ${error.data?.message || error.message || "Unknown error"}`
+      toast.error(
+        `Login failed: ${error.data?.message || error.message || "Unknown error"}`
       );
     }
   };
@@ -77,50 +83,54 @@ export default function Login() {
   };
 
   return (
-    <div className="flex flex-col justify-center items-center min-h-[70vh] bg-gray-100">
-      <Link href="/">
-        <h3 className="text-3xl font-bold text-gray-500 mb-5">
-          <span className="text-[#16a085]">Fine</span>Med
-        </h3>
-      </Link>
-      <div className="w-full max-w-md p-8 space-y-6 bg-white shadow-lg rounded-2xl">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold my-6 text-teal-600 text-center">
-            Log In
-          </h2>
-        </div>
+    <div className="flex min-h-[80vh] flex-col items-center justify-center bg-paper px-4 py-12">
+      <div className="mb-8">
+        <Logo />
+      </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" autoComplete="off">
-          <div>
+      <div className="relative w-full max-w-md">
+        <div className="rx-pad pointer-events-none absolute -inset-3 -z-10 rounded-2xl opacity-60" />
+        <Card padding="lg">
+          <div className="mb-6 flex flex-col items-center text-center">
+            <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-pharmacy-light text-pharmacy-deep">
+              <FontAwesomeIcon icon={faShieldHeart} className="h-5 w-5" />
+            </span>
+            <h2 className="font-display text-2xl font-semibold text-ink">Log In</h2>
+            <p className="mt-1 text-sm text-muted">Access your pharmacy record</p>
+          </div>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5" autoComplete="off">
             {/* Demo User and Demo Admin Buttons */}
-            <div className="flex space-x-2 mb-2">
-              <button
+            <div className="flex flex-wrap gap-2">
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={handleDemoUser}
-                className="px-4 py-2 text-sm font-medium rounded-lg transition duration-200 bg-teal-100 text-teal-700 hover:bg-teal-200"
                 aria-label="Login with demo user credentials"
               >
                 Demo User
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={handleDemoAdmin}
-                className="px-4 py-2 text-sm font-medium rounded-lg transition duration-200 bg-teal-100 text-teal-700 hover:bg-teal-200"
                 aria-label="Login with demo admin credentials"
               >
                 Demo Admin
-              </button>
+              </Button>
             </div>
 
             {/* Email/Phone Toggle Buttons */}
-            <div className="flex space-x-2 mb-2">
+            <div className="flex gap-2 rounded-full bg-paper-deep p-1">
               <button
                 type="button"
                 onClick={() => setLoginType("email")}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition duration-200 ${
+                className={`flex-1 rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-150 ${
                   loginType === "email"
-                    ? "bg-teal-500 text-white"
-                    : "bg-teal-100 text-teal-700 hover:bg-teal-200"
+                    ? "bg-pharmacy text-white"
+                    : "text-ink-soft hover:bg-surface"
                 }`}
               >
                 Email
@@ -128,115 +138,111 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => setLoginType("phone")}
-                className={`px-4 py-2 text-sm font-medium rounded-lg transition duration-200 ${
+                className={`flex-1 rounded-full px-4 py-1.5 text-sm font-medium transition-colors duration-150 ${
                   loginType === "phone"
-                    ? "bg-teal-500 text-white"
-                    : "bg-teal-100 text-teal-700 hover:bg-teal-200"
+                    ? "bg-pharmacy text-white"
+                    : "text-ink-soft hover:bg-surface"
                 }`}
               >
                 Phone Number
               </button>
             </div>
-            <label
-              htmlFor="emailOrPhone"
-              className="block text-sm font-medium text-teal-700"
-            >
-              {loginType === "email" ? "Email" : "Phone Number"}
-            </label>
-            <input
-              id="emailOrPhone"
-              type={loginType === "email" ? "text" : "tel"}
-              {...register("emailOrPhone", {
-                required: `${
-                  loginType === "email" ? "Email" : "Phone Number"
-                } is required`,
-                pattern: loginType === "email"
-                  ? {
-                      value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                      message: "Invalid email address",
-                    }
-                  : {
-                      value: /^01\d{9}$/,
-                      message: "Invalid phone number",
+
+            <div>
+              <Label htmlFor="emailOrPhone">
+                {loginType === "email" ? "Email" : "Phone Number"}
+              </Label>
+              <div className="relative">
+                <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted">
+                  <FontAwesomeIcon icon={loginType === "email" ? faEnvelope : faPhone} className="h-4 w-4" />
+                </span>
+                <Input
+                  id="emailOrPhone"
+                  type={loginType === "email" ? "text" : "tel"}
+                  {...register("emailOrPhone", {
+                    required: `${
+                      loginType === "email" ? "Email" : "Phone Number"
+                    } is required`,
+                    pattern: loginType === "email"
+                      ? {
+                          value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                          message: "Invalid email address",
+                        }
+                      : {
+                          value: /^01\d{9}$/,
+                          message: "Invalid phone number",
+                        },
+                  })}
+                  autoComplete="off"
+                  placeholder={
+                    loginType === "email"
+                      ? "e.g., user@example.com"
+                      : "e.g., 01712345678"
+                  }
+                  error={!!errors.emailOrPhone}
+                  className="pl-10"
+                />
+              </div>
+              {errors.emailOrPhone && (
+                <HelperText error>{errors.emailOrPhone.message}</HelperText>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted">
+                  <FontAwesomeIcon icon={faLock} className="h-4 w-4" />
+                </span>
+                <Input
+                  id="password"
+                  type="password"
+                  autoComplete="new-password"
+                  {...register("password", {
+                    required: "Password is required",
+                    minLength: {
+                      value: 6,
+                      message: "Password must be at least 6 characters",
                     },
-              })}
-              autoComplete="off"
-              placeholder={
-                loginType === "email"
-                  ? "e.g., user@example.com"
-                  : "e.g., 01712345678"
-              }
-              className="w-full px-4 py-2 mt-1 border border-teal-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none"
-            />
-            {errors.emailOrPhone && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.emailOrPhone.message}
-              </p>
-            )}
-          </div>
+                  })}
+                  error={!!errors.password}
+                  className="pl-10"
+                />
+              </div>
+              {errors.password && (
+                <HelperText error>{errors.password.message}</HelperText>
+              )}
+            </div>
 
-          <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-teal-700"
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="new-password"
-              {...register("password", {
-                required: "Password is required",
-                minLength: {
-                  value: 6,
-                  message: "Password must be at least 6 characters",
-                },
-              })}
-              className="w-full px-4 py-2 mt-1 border border-teal-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 focus:outline-none"
-            />
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-600">
-                {errors.password.message}
-              </p>
-            )}
-          </div>
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 text-sm text-ink-soft">
+                <input
+                  type="checkbox"
+                  {...register("remember")}
+                  className="h-4 w-4 rounded border-border text-pharmacy focus:ring-pharmacy"
+                />
+                Remember me
+              </label>
+              <Link
+                href="/forgot-password"
+                className="text-sm font-medium text-pharmacy hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
 
-          <div className="flex items-center justify-between">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                {...register("remember")}
-                className="text-teal-600 border-teal-300 rounded focus:ring-teal-500"
-              />
-              <span className="ml-2 text-sm text-teal-600">Remember me</span>
-            </label>
-            <Link
-              href="/forgot-password"
-              className="text-sm text-teal-600 hover:underline"
-            >
-              Forgot password?
+            <Button type="submit" variant="primary" fullWidth loading={isLoading}>
+              {isLoading ? "Logging in..." : "Login"}
+            </Button>
+          </form>
+
+          <p className="mt-6 text-center text-sm text-ink-soft">
+            Don&rsquo;t have an account?{" "}
+            <Link href="/register" className="font-medium text-pharmacy hover:underline">
+              Sign up
             </Link>
-          </div>
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full px-4 py-2 text-white bg-teal-500 rounded-lg hover:bg-teal-700 transition duration-200 disabled:opacity-70"
-          >
-            {isLoading ? "Logging in..." : "Login"}
-          </button>
-        </form>
-
-        <p className="text-sm text-center text-teal-600">
-          Don’t have an account?{" "}
-          <Link
-            href="/register"
-            className="font-medium text-teal-700 hover:underline"
-          >
-            Sign up
-          </Link>
-        </p>
+          </p>
+        </Card>
       </div>
     </div>
   );

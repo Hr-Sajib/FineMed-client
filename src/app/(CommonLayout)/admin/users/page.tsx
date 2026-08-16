@@ -5,15 +5,23 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useGetAllUserQuery } from "@/redux/features/user/userApi";
 import { setAllUsers, selectAllUsers } from "@/redux/features/allUsers/allUserSlice";
-import { selectOrders } from "@/redux/features/order/orderSlice";
+import { selectOrders, setOrders, IOrder } from "@/redux/features/order/orderSlice";
+import { useGetAllOrdersQuery } from "@/redux/features/order/orderApi";
 import { useGetAllReviewsQuery, useDeleteReviewByIdMutation } from "@/redux/features/review/reviewApi";
 import { toast } from "sonner";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronLeft, faChevronRight, faUser, faStar, faTrash } from "@fortawesome/free-solid-svg-icons";
+import Card from "@/components/ui/Card";
+import Badge from "@/components/ui/Badge";
+import Button from "@/components/ui/Button";
+import SectionHeading from "@/components/ui/SectionHeading";
 
 const Users = () => {
   const dispatch = useDispatch();
   const allUsers = useSelector(selectAllUsers);
   const orders = useSelector(selectOrders);
   const { data: allUsersRes } = useGetAllUserQuery();
+  const { data: ordersData } = useGetAllOrdersQuery();
   const { data: reviewsData, isLoading: reviewsLoading, refetch: refetchReviews } = useGetAllReviewsQuery();
   const [deleteReviewById, { isLoading: deleteLoading }] = useDeleteReviewByIdMutation();
   const [usersCurrentPage, setUsersCurrentPage] = useState(1);
@@ -29,6 +37,16 @@ const Users = () => {
       dispatch(setAllUsers(users));
     }
   }, [allUsersRes, dispatch]);
+
+  // Set orders in store (this page can be loaded directly without ever
+  // visiting /admin/orders, so the orders slice may otherwise be empty)
+  useEffect(() => {
+    if (ordersData?.data) {
+      // GET /orders returns products.productId populated as a full object;
+      // the orders slice's IOrder type still models it as a plain string id.
+      dispatch(setOrders(ordersData.data as unknown as IOrder[]));
+    }
+  }, [ordersData, dispatch]);
 
   // Compute order counts for all users
   const orderCounts = allUsers.reduce((acc, user) => {
@@ -96,67 +114,79 @@ const Users = () => {
   };
 
   return (
-    <div className="min-h-[70vh] p-6 space-y-12 mb-10">
+    <div className="min-h-[70vh] space-y-12 mb-10 max-w-7xl mx-auto">
       {/* Users Table */}
       <div>
-        <h2 className="text-3xl font-bold text-gray-700 text-center mb-8">All Users</h2>
+        <SectionHeading eyebrow="Directory" title="All Users" className="mb-6" />
         {allUsers && allUsers.length > 0 ? (
           <>
-            <div className="overflow-x-auto shadow-md rounded-lg border border-gray-200">
-              <table className="min-w-full bg-white table-fixed">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="w-1/5 py-3 px-4 text-left text-sm font-semibold text-gray-700">
-                      Name
-                    </th>
-                    <th className="w-1/5 py-3 px-4 text-left text-sm font-semibold text-gray-700">
-                      Email
-                    </th>
-                    <th className="w-1/5 py-3 px-4 text-left text-sm font-semibold text-gray-700">
-                      Phone
-                    </th>
-                    <th className="w-1/5 py-3 px-4 text-left text-sm font-semibold text-gray-700">
-                      Address
-                    </th>
-                    <th className="w-1/5 py-3 px-4 text-left text-sm font-semibold text-gray-700">
-                      Total Orders
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedUsers.map((user) => (
-                    <tr key={user._id} className="border-b hover:bg-gray-50">
-                      <td className="py-3 px-4 text-sm text-gray-600">{user.name}</td>
-                      <td className="py-3 px-4 text-sm text-gray-600">{user.email}</td>
-                      <td className="py-3 px-4 text-sm text-gray-600">{user.phone}</td>
-                      <td className="py-3 px-4 text-sm text-gray-600">{user.address}</td>
-                      <td className="py-3 px-4 text-sm text-gray-600">{orderCounts[user._id!]}</td>
+            <Card padding="none" className="overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead className="bg-paper-deep">
+                    <tr>
+                      <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-[0.06em] text-ink-soft">
+                        Name
+                      </th>
+                      <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-[0.06em] text-ink-soft">
+                        Email
+                      </th>
+                      <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-[0.06em] text-ink-soft">
+                        Phone
+                      </th>
+                      <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-[0.06em] text-ink-soft">
+                        Address
+                      </th>
+                      <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-[0.06em] text-ink-soft">
+                        Total Orders
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {paginatedUsers.map((user) => (
+                      <tr key={user._id} className="hover:bg-paper-deep/50 transition-colors">
+                        <td className="py-3 px-4 text-sm text-ink font-medium whitespace-nowrap">
+                          <span className="inline-flex items-center gap-2">
+                            <FontAwesomeIcon icon={faUser} className="h-3.5 w-3.5 text-pharmacy" />
+                            {user.name}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-sm text-ink-soft whitespace-nowrap">{user.email}</td>
+                        <td className="py-3 px-4 text-sm font-mono text-ink-soft whitespace-nowrap">{user.phone}</td>
+                        <td className="py-3 px-4 text-sm text-ink-soft">{user.address}</td>
+                        <td className="py-3 px-4 text-sm whitespace-nowrap">
+                          <Badge variant={orderCounts[user._id!] ? "success" : "neutral"}>
+                            {orderCounts[user._id!] ?? 0}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
             {/* Users Pagination Controls */}
-            <div className="flex justify-center mt-4 space-x-2">
+            <div className="flex justify-center items-center mt-4 gap-2">
               <button
                 onClick={handleUsersPrevious}
                 disabled={usersCurrentPage === 1}
-                className={`px-4 py-2 bg-gray-100 text-gray-700 rounded-md ${
+                className={`h-9 w-9 flex items-center justify-center rounded-full bg-surface border border-border text-ink-soft ${
                   usersCurrentPage === 1
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-gray-200"
+                    ? "opacity-40 cursor-not-allowed"
+                    : "hover:bg-pharmacy-light hover:text-pharmacy-deep"
                 }`}
+                aria-label="Previous page"
               >
-                Previous
+                <FontAwesomeIcon icon={faChevronLeft} className="h-3.5 w-3.5" />
               </button>
               {Array.from({ length: usersTotalPages }, (_, index) => index + 1).map((page) => (
                 <button
                   key={page}
                   onClick={() => handleUsersPageChange(page)}
-                  className={`px-4 py-2 rounded-md ${
+                  className={`h-9 w-9 flex items-center justify-center rounded-full text-sm font-medium transition-colors ${
                     usersCurrentPage === page
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      ? "bg-pharmacy text-white"
+                      : "bg-surface border border-border text-ink-soft hover:bg-pharmacy-light hover:text-pharmacy-deep"
                   }`}
                 >
                   {page}
@@ -165,93 +195,101 @@ const Users = () => {
               <button
                 onClick={handleUsersNext}
                 disabled={usersCurrentPage === usersTotalPages}
-                className={`px-4 py-2 bg-gray-100 text-gray-700 rounded-md ${
+                className={`h-9 w-9 flex items-center justify-center rounded-full bg-surface border border-border text-ink-soft ${
                   usersCurrentPage === usersTotalPages
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-gray-200"
+                    ? "opacity-40 cursor-not-allowed"
+                    : "hover:bg-pharmacy-light hover:text-pharmacy-deep"
                 }`}
+                aria-label="Next page"
               >
-                Next
+                <FontAwesomeIcon icon={faChevronRight} className="h-3.5 w-3.5" />
               </button>
             </div>
           </>
         ) : (
-          <p className="text-center text-gray-500 mt-4">No users found.</p>
+          <p className="text-center text-muted mt-4">No users found.</p>
         )}
       </div>
 
       {/* Reviews Table */}
       <div>
-        <h2 className="text-3xl font-bold text-gray-700 text-center mb-8">All Reviews</h2>
+        <SectionHeading eyebrow="Feedback" title="All Reviews" className="mb-6" />
         {reviewsLoading ? (
-          <p className="text-center text-gray-500 mt-4">Loading reviews...</p>
+          <p className="text-center text-muted mt-4">Loading reviews...</p>
         ) : reviewsData?.data && reviewsData.data.length > 0 ? (
           <>
-            <div className="overflow-x-auto shadow-md rounded-lg border border-gray-200">
-              <table className="min-w-full bg-white table-fixed">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="w-1/5 py-3 px-4 text-left text-sm font-semibold text-gray-700">
-                      User Email
-                    </th>
-                    <th className="w-2/5 py-3 px-4 text-left text-sm font-semibold text-gray-700">
-                      Review
-                    </th>
-                    <th className="w-1/5 py-3 px-4 text-left text-sm font-semibold text-gray-700">
-                      Star Count
-                    </th>
-                    <th className="w-1/5 py-3 px-4 text-left text-sm font-semibold text-gray-700">
-                      Order Count
-                    </th>
-                    <th className="w-1/5 py-3 px-4 text-left text-sm font-semibold text-gray-700">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedReviews.map((review) => (
-                    <tr key={review._id} className="border-b hover:bg-gray-50">
-                      <td className="py-3 px-4 text-sm text-gray-600">{review.userEmail}</td>
-                      <td className="py-3 px-4 text-sm text-gray-600">{review.reviewText}</td>
-                      <td className="py-3 px-4 text-sm text-gray-600">{review.starCount}</td>
-                      <td className="py-3 px-4 text-sm text-gray-600">{review.orderCount}</td>
-                      <td className="py-3 px-4">
-                        <button
-                          onClick={() => handleDeleteReview(review._id)}
-                          disabled={deleteLoading}
-                          className={`bg-red-700 text-white px-4 py-1 rounded hover:bg-red-600 transition ${
-                            deleteLoading ? "opacity-50 cursor-not-allowed" : ""
-                          }`}
-                        >
-                          Delete
-                        </button>
-                      </td>
+            <Card padding="none" className="overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full">
+                  <thead className="bg-paper-deep">
+                    <tr>
+                      <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-[0.06em] text-ink-soft">
+                        User Email
+                      </th>
+                      <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-[0.06em] text-ink-soft">
+                        Review
+                      </th>
+                      <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-[0.06em] text-ink-soft">
+                        Stars
+                      </th>
+                      <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-[0.06em] text-ink-soft">
+                        Orders
+                      </th>
+                      <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-[0.06em] text-ink-soft">
+                        Actions
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {paginatedReviews.map((review) => (
+                      <tr key={review._id} className="hover:bg-paper-deep/50 transition-colors">
+                        <td className="py-3 px-4 text-sm text-ink-soft whitespace-nowrap">{review.userEmail}</td>
+                        <td className="py-3 px-4 text-sm text-ink max-w-xs">{review.reviewText}</td>
+                        <td className="py-3 px-4 text-sm whitespace-nowrap">
+                          <Badge variant="warning" icon={<FontAwesomeIcon icon={faStar} />}>
+                            {review.starCount}
+                          </Badge>
+                        </td>
+                        <td className="py-3 px-4 text-sm font-mono text-ink-soft whitespace-nowrap">{review.orderCount}</td>
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            icon={<FontAwesomeIcon icon={faTrash} />}
+                            loading={deleteLoading}
+                            onClick={() => handleDeleteReview(review._id)}
+                          >
+                            Delete
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
             {/* Reviews Pagination Controls */}
-            <div className="flex justify-center mt-4 space-x-2">
+            <div className="flex justify-center items-center mt-4 gap-2">
               <button
                 onClick={handleReviewsPrevious}
                 disabled={reviewsCurrentPage === 1}
-                className={`px-4 py-2 bg-gray-100 text-gray-700 rounded-md ${
+                className={`h-9 w-9 flex items-center justify-center rounded-full bg-surface border border-border text-ink-soft ${
                   reviewsCurrentPage === 1
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-gray-200"
+                    ? "opacity-40 cursor-not-allowed"
+                    : "hover:bg-pharmacy-light hover:text-pharmacy-deep"
                 }`}
+                aria-label="Previous page"
               >
-                Previous
+                <FontAwesomeIcon icon={faChevronLeft} className="h-3.5 w-3.5" />
               </button>
               {Array.from({ length: reviewsTotalPages }, (_, index) => index + 1).map((page) => (
                 <button
                   key={page}
                   onClick={() => handleReviewsPageChange(page)}
-                  className={`px-4 py-2 rounded-md ${
+                  className={`h-9 w-9 flex items-center justify-center rounded-full text-sm font-medium transition-colors ${
                     reviewsCurrentPage === page
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      ? "bg-pharmacy text-white"
+                      : "bg-surface border border-border text-ink-soft hover:bg-pharmacy-light hover:text-pharmacy-deep"
                   }`}
                 >
                   {page}
@@ -260,18 +298,19 @@ const Users = () => {
               <button
                 onClick={handleReviewsNext}
                 disabled={reviewsCurrentPage === reviewsTotalPages}
-                className={`px-4 py-2 bg-gray-100 text-gray-700 rounded-md ${
+                className={`h-9 w-9 flex items-center justify-center rounded-full bg-surface border border-border text-ink-soft ${
                   reviewsCurrentPage === reviewsTotalPages
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-gray-200"
+                    ? "opacity-40 cursor-not-allowed"
+                    : "hover:bg-pharmacy-light hover:text-pharmacy-deep"
                 }`}
+                aria-label="Next page"
               >
-                Next
+                <FontAwesomeIcon icon={faChevronRight} className="h-3.5 w-3.5" />
               </button>
             </div>
           </>
         ) : (
-          <p className="text-center text-gray-500 mt-4">No reviews found.</p>
+          <p className="text-center text-muted mt-4">No reviews found.</p>
         )}
       </div>
     </div>

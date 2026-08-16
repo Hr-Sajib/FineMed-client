@@ -1,19 +1,148 @@
 @import "tailwindcss";
 
+/*
+  FineMed design system — "Digital Apothecary"
+  Signature: pharmacy-green as the one bold accent (echoes the international
+  pharmacy cross), a cool clinical paper background (not the generic warm
+  cream), Fraunces for apothecary-label-style display type, IBM Plex Sans
+  for clinical UI precision, IBM Plex Mono for label data (prices, dosage,
+  order IDs, expiry dates — anywhere a real medicine label would use a
+  monospaced number).
+*/
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-paper: #f3f8f5;
+  --color-paper-deep: #e9f2ec;
+  --color-surface: #ffffff;
+  --color-ink: #10231d;
+  --color-ink-soft: #3d4d47;
+  --color-muted: #6b7a75;
+  --color-border: #dbe6e0;
+
+  --color-pharmacy: #0f7a4a;
+  --color-pharmacy-deep: #0a5c37;
+  --color-pharmacy-light: #e3f3ea;
+
+  --color-rx: #c6412f;
+  --color-rx-deep: #a1301f;
+  --color-rx-light: #fbe8e4;
+
+  --color-amber: #b8790f;
+  --color-amber-light: #faf0dc;
+
+  --shadow-card: 0 1px 2px rgba(16, 35, 29, 0.04), 0 8px 24px -12px rgba(16, 35, 29, 0.18);
+  --shadow-card-hover: 0 4px 8px rgba(16, 35, 29, 0.06), 0 16px 32px -12px rgba(16, 35, 29, 0.24);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-paper: var(--color-paper);
+  --color-paper-deep: var(--color-paper-deep);
+  --color-surface: var(--color-surface);
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-muted: var(--color-muted);
+  --color-border: var(--color-border);
+
+  --color-pharmacy: var(--color-pharmacy);
+  --color-pharmacy-deep: var(--color-pharmacy-deep);
+  --color-pharmacy-light: var(--color-pharmacy-light);
+
+  --color-rx: var(--color-rx);
+  --color-rx-deep: var(--color-rx-deep);
+  --color-rx-light: var(--color-rx-light);
+
+  --color-amber: var(--color-amber);
+  --color-amber-light: var(--color-amber-light);
+
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+
+::selection {
+  background: var(--color-pharmacy);
+  color: white;
+}
+
+/* Consistent keyboard focus ring across every interactive element */
+:focus-visible {
+  outline: 2px solid var(--color-pharmacy);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Thin, quiet scrollbar that matches the palette (Webkit + Firefox) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted);
+}
+
+/*
+  Signature texture: a faint ruled "prescription pad" background used
+  behind the homepage hero / search panel and echoed in a couple of other
+  high-intent panels (auth cards, checkout summary). Kept subtle — this is
+  the one place the brief's boldness is spent, everything else stays quiet.
+*/
+.rx-pad {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 27px,
+    var(--color-border) 27px,
+    var(--color-border) 28px
+  );
+  background-position: 0 6px;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+/*
+  Gentle attention-getter for the floating coupon widget's collapsed
+  button — a soft bob rather than a hard bounce, so it reads as "there's
+  something here" without being distracting while it sits fixed on screen.
+*/
+@keyframes gentle-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.animate-gentle-float {
+  animation: gentle-float 3s ease-in-out infinite;
+}
+
+/* Respect reduced-motion preference for any transition/animation utilities */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

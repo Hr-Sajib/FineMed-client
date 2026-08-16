@@ -1,30 +1,49 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMortarPestle, faHeadset, faShieldHeart, faTruckMedical } from "@fortawesome/free-solid-svg-icons";
+
+const highlights = [
+  { icon: faHeadset, label: "24/7 Support" },
+  { icon: faShieldHeart, label: "100% Genuine Products" },
+  { icon: faTruckMedical, label: "Fast Delivery" },
+];
+
+/**
+ * `bg-fixed` (background-attachment: fixed) only stays fixed relative to the
+ * viewport if nothing between it and the viewport is transformed — so the
+ * AOS animation (which applies a CSS transform while animating in) has to
+ * live on an inner wrapper, never on the element that carries the fixed
+ * background image itself, or the "parallax" effect breaks.
+ */
 const Branding = () => {
   return (
-    <section data-aos="fade-down" className="bg-[url('/images/medic.jpg')] bg-fixed w-full lg:h-84 h-[21vh] bg-no-repeat bg-center bg-cover px-4 text-center shadow-md mb-20 relative">
-      <div className="bg-gradient-to-tr from-[#4fd1c57a] to-[#000000d4] w-full h-full absolute left-0"></div>
-      <div className="container mx-auto ">
-        <div className="relative top-2 md:top-20">
-          <h1 className="text-4xl font-bold text-teal-200 mb-3">FineMed</h1>
-          <p className="text-lg text-white mb-6">
-            Your trusted online pharmacy for genuine medicines, health products,
-            and wellness care.
-          </p>
-          <div className="flex flex-wrap justify-center gap-2 font-semibold">
-            <span className="bg-white px-4 py-2 rounded-full border text-sm text-teal-600 shadow">
-              24/7 Support
+    <section className="relative w-full overflow-hidden bg-[url('/images/medic.jpg')] bg-fixed bg-cover bg-center bg-no-repeat shadow-[var(--shadow-card)] mb-20">
+      <div className="absolute inset-0 bg-gradient-to-br from-pharmacy-deep/90 via-ink/75 to-ink/90" />
+      <div
+        data-aos="fade-down"
+        className="relative z-10 mx-auto flex min-h-[360px] max-w-4xl flex-col items-center justify-center px-4 py-16 text-center sm:min-h-[420px] lg:min-h-[480px]"
+      >
+        <span className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-white/10 text-white">
+          <FontAwesomeIcon icon={faMortarPestle} className="h-6 w-6" />
+        </span>
+        <h1 className="font-display text-4xl font-semibold text-white sm:text-5xl">
+          Fine<span className="text-pharmacy-light">Med</span>
+        </h1>
+        <p className="mt-4 max-w-xl text-lg text-white/85">
+          Your trusted online pharmacy for genuine medicines, health products, and wellness care.
+        </p>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          {highlights.map((item) => (
+            <span
+              key={item.label}
+              className="inline-flex items-center gap-2 rounded-full bg-surface px-4 py-2 text-sm font-semibold text-pharmacy-deep shadow-[var(--shadow-card)]"
+            >
+              <FontAwesomeIcon icon={item.icon} className="h-3.5 w-3.5" />
+              {item.label}
             </span>
-            <span className="bg-white px-4 py-2 rounded-full border text-sm text-teal-600 shadow">
-              100% Genuine Products
-            </span>
-            <span className="bg-white px-4 py-2 rounded-full border text-sm text-teal-600 shadow">
-              Fast Delivery
-            </span>
-          </div>
+          ))}
         </div>
       </div>
     </section>
-
-
   );
 };
 

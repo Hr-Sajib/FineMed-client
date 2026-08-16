@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { logout } from "../auth/authSlice";
 
 // Define the product in the order
 export type TProduct = {
@@ -66,6 +67,12 @@ const orderSlice = createSlice({
     clearOrders: (state) => {
       state.orders = [];
     },
+  },
+  extraReducers: (builder) => {
+    // Clear orders data whenever the user logs out, so a previous
+    // admin's view of ALL orders doesn't linger in memory for a
+    // different logged-in user in the same session.
+    builder.addCase(logout, () => initialState);
   },
 });
 

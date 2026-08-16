@@ -45,18 +45,15 @@ const userPersistConfig = {
   storage,
 };
 
-const allUsersPersistConfig = {
-  key: 'allUsers',
-  storage,
-};
-
 // Persisted reducers
 const persistedAuthReducer = persistReducer(authPersistConfig, authReducer);
 const persistedCartReducer = persistReducer(cartPersistConfig, cartReducer);
 const persistedOrdersReducer = persistReducer(ordersPersistConfig, orderReducer);
 const persistedMedicineReducer = persistReducer(medicinePersistConfig, medicineReducer);
 const persistedUserReducer = persistReducer(userPersistConfig, userReducer);
-const persistedAllUsersReducer = persistReducer(allUsersPersistConfig, allUserReducer);
+// Note: allUsers is intentionally NOT persisted — it holds admin-only PII
+// (all users' names/emails/phones/addresses) and must never survive in
+// localStorage across sessions or user switches.
 
 // Configure store
 export const store = configureStore({
@@ -65,8 +62,8 @@ export const store = configureStore({
     cart: persistedCartReducer,
     orders: persistedOrdersReducer,
     medicines: persistedMedicineReducer,
-    user: persistedUserReducer,         // 👤 Persisted single user
-    allUsers: persistedAllUsersReducer, // 👥 Persisted all users
+    user: persistedUserReducer,   // 👤 Persisted single user
+    allUsers: allUserReducer,     // 👥 NOT persisted (admin-only PII)
     [baseApi.reducerPath]: baseApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>

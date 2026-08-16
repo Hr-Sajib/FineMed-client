@@ -11,10 +11,12 @@ import { setUser, logout } from "../features/auth/authSlice";
 interface ErrorData {
   message?: string;
 }
-// https://fine-med-server.vercel.app/api
-// http://localhost:5100/api
+
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || "https://fine-med-server.vercel.app/api";
+
 const baseQuery = fetchBaseQuery({
-  baseUrl: "https://fine-med-server.vercel.app/api",
+  baseUrl: API_BASE_URL,
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth?.token;
@@ -39,7 +41,7 @@ const baseQueryWithRefreshToken: BaseQueryFn<
       (result.error.data as ErrorData)?.message === "jwt expired")
   ) {
     const refreshResult = await fetch(
-      "https://fine-med-server.vercel.app/api/auth/refresh-token",
+      `${API_BASE_URL}/auth/refresh-token`,
       {
         method: "POST",
         credentials: "include",
