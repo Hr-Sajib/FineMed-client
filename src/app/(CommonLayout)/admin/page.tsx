@@ -103,7 +103,7 @@ const AdminDefaultPage = () => {
     total: allUsers.length || 0,
     byRole: {
       admin: allUsers.filter((u) => u.role === "admin").length || 0,
-      user: allUsers.filter((u) => u.role === "user").length || 0,
+      user: allUsers.filter((u) => u.role === "customer").length || 0,
     },
   };
 

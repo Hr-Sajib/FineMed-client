@@ -78,15 +78,22 @@ const AllMedicinesPage = () => {
 
   const itemsPerPage = 9;
 
-  const { data, isLoading, error } = useGetAllMedicinesQuery({
-    search: search || undefined,
-  }) as { data?: MedicinesResponse; isLoading: boolean; error: any };
+  // Fetch the full catalog once — category/form/prescription/search are all
+  // applied client-side below (consistent with each other, and avoids a
+  // refetch-per-keystroke race where the Redux store's `medicines` array
+  // could lag behind what the search box shows).
+  const { data, isLoading, error } = useGetAllMedicinesQuery({}) as {
+    data?: MedicinesResponse;
+    isLoading: boolean;
+    error: any;
+  };
 
-  // Update URL when search or category changes
+  // Update URL when search or category changes. URLSearchParams.set already
+  // URL-encodes its value, so encoding it again first would double-encode.
   useEffect(() => {
     const query = new URLSearchParams();
-    if (search) query.set("search", encodeURIComponent(search));
-    if (filterCategory) query.set("category", encodeURIComponent(filterCategory));
+    if (search) query.set("search", search);
+    if (filterCategory) query.set("category", filterCategory);
     const queryString = query.toString();
     router.replace(`/shop${queryString ? `?${queryString}` : ""}`, { scroll: false });
   }, [search, filterCategory, router]);
@@ -134,7 +141,15 @@ const AllMedicinesPage = () => {
   }, [search, filterCategory, filterForm, filterPrescription, sortPrice]);
 
   const filteredMedicines = useMemo(() => {
+    const term = search.trim().toLowerCase();
+
     return medicines.filter((medicine) => {
+      const matchesSearch = term
+        ? [medicine.name, medicine.generic, medicine.brand].some((field) =>
+            field?.toLowerCase().includes(term)
+          )
+        : true;
+
       const matchesCategory = filterCategory
         ? medicine.category?.toLowerCase() === filterCategory.toLowerCase()
         : true;
@@ -147,9 +162,9 @@ const AllMedicinesPage = () => {
         ? medicine.prescriptionRequired === (filterPrescription === "Yes")
         : true;
 
-      return matchesCategory && matchesForm && matchesPrescription;
+      return matchesSearch && matchesCategory && matchesForm && matchesPrescription;
     });
-  }, [medicines, filterCategory, filterForm, filterPrescription]);
+  }, [medicines, search, filterCategory, filterForm, filterPrescription]);
 
   // Sorting logic
   const sortedMedicines = useMemo(() => {

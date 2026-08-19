@@ -132,7 +132,7 @@ const Overview = ({ myOrders }: any) => {
   };
 
   // Calculate orders over time (last 6 months)
-  const currentDate = new Date("2025-05-13"); // Current date: May 13, 2025
+  const currentDate = new Date();
   const months: string[] = [];
   const orderCounts: number[] = [];
   for (let i = 5; i >= 0; i--) {
