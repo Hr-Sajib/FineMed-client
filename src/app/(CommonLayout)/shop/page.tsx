@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter, useSearchParams } from "next/navigation";
