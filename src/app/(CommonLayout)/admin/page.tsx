@@ -210,6 +210,21 @@ const AdminDefaultPage = () => {
     },
   };
 
+  // Pie charts specifically (not the bar chart above) were rendering as a
+  // clipped wedge instead of a full circle — Chart.js's layout algorithm
+  // under-reserves space for a top-positioned legend in a tight box, so the
+  // circle's radius/center get computed against a mismeasured plot area.
+  // A bottom legend avoids that miscalculation.
+  const pieChartOptions = {
+    ...chartOptions,
+    plugins: {
+      legend: {
+        position: "bottom" as const,
+        labels: { color: "#3d4d47", font: { family: "var(--font-sans)" } },
+      },
+    },
+  };
+
   const barOptions = {
     ...chartOptions,
     scales: {
@@ -290,7 +305,7 @@ const AdminDefaultPage = () => {
         <Card>
           <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-pharmacy-deep mb-4">Users by Role</h3>
           <div className="h-64">
-            <Pie data={userPieData} options={chartOptions} />
+            <Pie data={userPieData} options={pieChartOptions} />
           </div>
         </Card>
 
@@ -298,7 +313,7 @@ const AdminDefaultPage = () => {
         <Card>
           <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-pharmacy-deep mb-4">Orders by Status</h3>
           <div className="h-64">
-            <Pie data={orderPieData} options={chartOptions} />
+            <Pie data={orderPieData} options={pieChartOptions} />
           </div>
         </Card>
 
@@ -306,7 +321,7 @@ const AdminDefaultPage = () => {
         <Card>
           <h3 className="text-sm font-semibold uppercase tracking-[0.08em] text-pharmacy-deep mb-4">Medicines by Category</h3>
           <div className="h-64">
-            <Pie data={medicinePieData} options={chartOptions} />
+            <Pie data={medicinePieData} options={pieChartOptions} />
           </div>
         </Card>
 
