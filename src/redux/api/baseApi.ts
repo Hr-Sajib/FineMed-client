@@ -13,7 +13,7 @@ interface ErrorData {
 }
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "https://fine-med-server.vercel.app/api";
+  process.env.NEXT_PUBLIC_API_URL || "https://finemedapi.sajibofficial.me/api";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: API_BASE_URL,
